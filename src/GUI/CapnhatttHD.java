@@ -87,7 +87,7 @@ public class CapnhatttHD extends BaseFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
-                new TTCThd().setVisible(true);
+                new TTCThd();
             }
         });
 
@@ -611,8 +611,17 @@ public class CapnhatttHD extends BaseFrame {
 
         if (hdBLL.capNhatHoaDonVoiChiTiet(hd, danhSachChiTiet)) {
             JOptionPane.showMessageDialog(this, "Cập nhật hóa đơn thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+            // Tạo đối tượng hóa đơn đã cập nhật
+            HoaDonDTO updatedHD = hdBLL.layHoaDonTheoMa(maHD);
+
+            // Đóng form hiện tại
             dispose();
-            new TTCThd().setVisible(true);
+
+            // Mở lại trang thông tin chi tiết với dữ liệu mới
+            TTCThd ttct = new TTCThd();
+            ttct.loadHoaDonInfo(updatedHD.getMaHoaDon());
+            ttct.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Cập nhật hóa đơn thất bại! Vui lòng kiểm tra log hệ thống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }

@@ -4,9 +4,12 @@ import bll.HoaDonBLL;
 import dto.HoaDonDTO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import com.toedter.calendar.JDateChooser;
 
@@ -18,6 +21,7 @@ public class HoaDon extends BaseFrame {
     private JTextField txtMinAmount, txtMaxAmount;
     private JComboBox<String> searchCriteriaComboBox;
     private HoaDonBLL hdBLL;
+    private JComboBox<String> cboTrangThai;
 
     public HoaDon() {
         super("Quản lý Hóa đơn");
@@ -160,10 +164,20 @@ public class HoaDon extends BaseFrame {
         txtMaxAmount = new JTextField();
         txtMaxAmount.setBounds(600, yPos, 150, 25);
         add(txtMaxAmount);
+
+        // Thêm combobox lọc trạng thái
+        yPos += 35;
+        JLabel lblTrangThai = new JLabel("Trạng thái:");
+        lblTrangThai.setBounds(270, yPos, 70, 25);
+        add(lblTrangThai);
+
+        cboTrangThai = new JComboBox<>(new String[]{"Tất cả", "Bình thường", "Đã hủy"});
+        cboTrangThai.setBounds(340, yPos, 150, 25);
+        add(cboTrangThai);
     }
 
     private void initTable() {
-        String[] columnNames = {"Mã hóa đơn", "Mã nhân viên", "Mã khách hàng", "Ngày bán", "Thành tiền"};
+        String[] columnNames = {"Mã hóa đơn", "Mã nhân viên", "Mã khách hàng", "Ngày bán", "Thành tiền", "Trạng thái"};
         model = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -171,7 +185,25 @@ public class HoaDon extends BaseFrame {
             }
         };
 
-        table = new JTable(model);
+        table = new JTable(model) {
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+
+                // Lấy giá trị trạng thái từ model (cột cuối cùng)
+                String trangThai = (String) model.getValueAt(row, model.getColumnCount() - 1);
+
+                if ("Đã hủy".equals(trangThai)) {
+                    c.setBackground(Color.LIGHT_GRAY);
+                    c.setForeground(Color.DARK_GRAY);
+                } else {
+                    c.setBackground(getBackground());
+                    c.setForeground(getForeground());
+                }
+                return c;
+            }
+        };
+
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         table.addMouseListener(new MouseAdapter() {
@@ -226,6 +258,9 @@ public class HoaDon extends BaseFrame {
         Double minAmount = null;
         Double maxAmount = null;
 
+        // Lấy trạng thái từ combobox
+        String trangThai = cboTrangThai.getSelectedItem().toString();
+
         try {
             if (!txtMinAmount.getText().isEmpty()) {
                 minAmount = Double.parseDouble(txtMinAmount.getText());
@@ -238,7 +273,7 @@ public class HoaDon extends BaseFrame {
             return;
         }
 
-        searchHoaDon(keyword, fromDate, toDate, minAmount, maxAmount);
+        searchHoaDon(keyword, fromDate, toDate, minAmount, maxAmount, trangThai);
     }
 
     private void loadDataToTable() {
@@ -248,10 +283,19 @@ public class HoaDon extends BaseFrame {
     }
 
     private void searchHoaDon(String keyword, String fromDate, String toDate,
-                              Double minAmount, Double maxAmount) {
+                              Double minAmount, Double maxAmount, String trangThai) {
         model.setRowCount(0);
+
+        // Chuyển đổi giá trị trạng thái từ combobox sang giá trị DB
+        String dbTrangThai = null;
+        if ("Bình thường".equals(trangThai)) {
+            dbTrangThai = "BINH_THUONG";
+        } else if ("Đã hủy".equals(trangThai)) {
+            dbTrangThai = "DA_HUY";
+        }
+
         List<HoaDonDTO> danhSach = hdBLL.timKiemHoaDon(
-                keyword, fromDate, toDate, minAmount, maxAmount);
+                keyword, fromDate, toDate, minAmount, maxAmount, trangThai);
         displayData(danhSach);
     }
 
@@ -259,15 +303,27 @@ public class HoaDon extends BaseFrame {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         for (HoaDonDTO hd : danhSach) {
+            String trangThai = "Bình thường";
+            if ("DA_HUY".equals(hd.getTrangThai())) {
+                trangThai = "Đã hủy";
+            }
+
             Object[] row = {
                     hd.getMaHoaDon(),
                     hd.getMaNhanVien(),
                     hd.getMaKH(),
                     hd.getNgayBan() != null ? dateFormat.format(hd.getNgayBan()) : "N/A",
-                    String.format("%,.0f VNĐ", hd.getThanhTien())
+                    String.format("%,.0f VNĐ", hd.getThanhTien()),
+                    trangThai
             };
             model.addRow(row);
         }
+
+//        // Sắp xếp lại để các hóa đơn đã hủy xuống dưới
+//        table.setRowSorter(new TableRowSorter<>(model));
+//        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+//        sortKeys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING)); // Sắp xếp theo cột trạng thái
+//        table.getRowSorter().setSortKeys(sortKeys);
     }
 
     public void refreshTable() {

@@ -4,6 +4,8 @@ import dal.SanPhamDAL;
 import dal.hoadonDAL;
 import dto.ChiTietHoaDonDTO;
 import dto.HoaDonDTO;
+
+import javax.swing.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +39,10 @@ public class HoaDonBLL {
         return hdDAL.themHoaDon(hd);
     }
 
-    public List<HoaDonDTO> timKiemHoaDon(String keyword, String fromDate,
-                                         String toDate, Double minAmount, Double maxAmount) {
-        return hdDAL.timKiemHoaDon(keyword, fromDate, toDate, minAmount, maxAmount);
+    // Cập nhật phương thức tìm kiếm để hỗ trợ lọc trạng thái
+    public List<HoaDonDTO> timKiemHoaDon(String keyword, String fromDate, String toDate,
+                                         Double minAmount, Double maxAmount, String trangThai) {
+        return hdDAL.timKiemHoaDon(keyword, fromDate, toDate, minAmount, maxAmount, trangThai);
     }
 
     public List<ChiTietHoaDonDTO> layChiTietHoaDon(String maHoaDon) {
@@ -84,11 +87,32 @@ public class HoaDonBLL {
 
     // Thêm các phương thức mới
     public boolean themHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
+        // Kiểm tra số lượng tồn kho trước
+        if (!kiemTraSoLuongTonKho(danhSachChiTiet)) {
+            JOptionPane.showMessageDialog(null, "Một số sản phẩm không đủ số lượng tồn kho!");
+            return false;
+        }
+
+        // Tính tổng tiền
+        double tongTien = danhSachChiTiet.stream()
+                .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
+                .sum();
+        hd.setThanhTien(tongTien);
+
+        return hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
+    }
+
+    private boolean kiemTraSoLuongTonKho(List<ChiTietHoaDonDTO> danhSachChiTiet) {
+        SanPhamDAL spDAL = new SanPhamDAL();
         try {
-            boolean result = hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
-            return result;
+            for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
+                int tonKho = spDAL.getSoLuongTon(ct.getMaSanPham());
+                if (tonKho < ct.getSoLuong()) {
+                    return false;
+                }
+            }
+            return true;
         } catch (Exception e) {
-            System.err.println("Lỗi trong BLL: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -177,5 +201,22 @@ public class HoaDonBLL {
         SanPhamDAL spDAL = new SanPhamDAL();
         return spDAL.getSanPhamById(maSP) != null;
     }
+
+    // Thay thế phương thức xóa bằng hủy
+    public boolean huyHoaDon(String maHoaDon) {
+        try {
+            // Kiểm tra xem hóa đơn đã hủy chưa
+            HoaDonDTO hd = hdDAL.layHoaDonTheoMa(maHoaDon);
+            if (hd == null || "DA_HUY".equals(hd.getTrangThai())) {
+                return false;
+            }
+
+            return hdDAL.huyHoaDon(maHoaDon);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

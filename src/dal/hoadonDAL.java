@@ -4,6 +4,7 @@ import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
 import java.sql.*;
 import java.util.*;
+import dal.DatabaseHelper;
 
 public class hoadonDAL {
     private final String url = "jdbc:oracle:thin:@localhost:1521:orcl";
@@ -34,7 +35,8 @@ public class hoadonDAL {
                         rs.getString("MANHANVIEN"),
                         rs.getString("MAKH"),
                         rs.getDate("NGAYBAN"),
-                        rs.getDouble("THANHTIEN")
+                        rs.getDouble("THANHTIEN"),
+                        rs.getString("TRANGTHAI")
                 );
                 danhSach.add(hd);
             }
@@ -58,6 +60,7 @@ public class hoadonDAL {
             pst.setString(3, hd.getMaKH());
             pst.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
             pst.setDouble(5, hd.getThanhTien());
+            pst.setString(6, hd.getTrangThai());
 
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -70,7 +73,7 @@ public class hoadonDAL {
 
     // Tìm kiếm hóa đơn
     public List<HoaDonDTO> timKiemHoaDon(String keyword, String fromDate, String toDate,
-                                         Double minAmount, Double maxAmount) {
+                                         Double minAmount, Double maxAmount, String trangThai) {
         List<HoaDonDTO> danhSach = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM HOADON WHERE 1=1");
 
@@ -108,6 +111,15 @@ public class hoadonDAL {
             sql.append(" AND THANHTIEN <= ?");
         }
 
+        // Thêm điều kiện lọc theo trạng thái
+        if (trangThai != null && !trangThai.isEmpty() && !"Tất cả".equals(trangThai)) {
+            String dbTrangThai = "BINH_THUONG";
+            if ("Đã hủy".equals(trangThai)) {
+                dbTrangThai = "DA_HUY";
+            }
+            sql.append(" AND TRANGTHAI = ?");
+        }
+
         try {
             conn = getConnection();
             pst = conn.prepareStatement(sql.toString());
@@ -141,6 +153,15 @@ public class hoadonDAL {
                 pst.setDouble(paramIndex++, maxAmount);
             }
 
+            // Thêm tham số trạng thái nếu có
+            if (trangThai != null && !trangThai.isEmpty() && !"Tất cả".equals(trangThai)) {
+                String dbTrangThai = "BINH_THUONG";
+                if ("Đã hủy".equals(trangThai)) {
+                    dbTrangThai = "DA_HUY";
+                }
+                pst.setString(paramIndex++, dbTrangThai);
+            }
+
             rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -149,7 +170,8 @@ public class hoadonDAL {
                         rs.getString("MANHANVIEN"),
                         rs.getString("MAKH"),
                         rs.getDate("NGAYBAN"),
-                        rs.getDouble("THANHTIEN")
+                        rs.getDouble("THANHTIEN"),
+                        rs.getString("TRANGTHAI")
                 );
                 danhSach.add(hd);
             }
@@ -191,7 +213,7 @@ public class hoadonDAL {
 
     // Các phương thức tính doanh thu (giữ nguyên từ code cũ)
     public double getDoanhThuTheoNgay(java.util.Date ngay) {
-        String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE TRUNC(NGAYBAN) = TRUNC(?)";
+        String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE TRUNC(NGAYBAN) = TRUNC(?) AND TRANGTHAI = 'BINH_THUONG'";
         try {
             conn = getConnection();
             pst = conn.prepareStatement(sql);
@@ -211,7 +233,7 @@ public class hoadonDAL {
 
     public double getDoanhThuTheoThang(int thang, int nam) {
         String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON " +
-                "WHERE EXTRACT(MONTH FROM NGAYBAN) = ? AND EXTRACT(YEAR FROM NGAYBAN) = ?";
+                "WHERE EXTRACT(MONTH FROM NGAYBAN) = ? AND EXTRACT(YEAR FROM NGAYBAN) = ? AND TRANGTHAI = 'BINH_THUONG'";
         try {
             conn = getConnection();
             pst = conn.prepareStatement(sql);
@@ -231,7 +253,7 @@ public class hoadonDAL {
     }
 
     public double getDoanhThuTheoNam(int nam) {
-        String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE EXTRACT(YEAR FROM NGAYBAN) = ?";
+        String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE EXTRACT(YEAR FROM NGAYBAN) = ? AND TRANGTHAI = 'BINH_THUONG'";
         try {
             conn = getConnection();
             pst = conn.prepareStatement(sql);
@@ -278,7 +300,8 @@ public class hoadonDAL {
                         rs.getString("MANHANVIEN"),
                         rs.getString("MAKH"),
                         rs.getDate("NGAYBAN"),
-                        rs.getDouble("THANHTIEN")
+                        rs.getDouble("THANHTIEN"),
+                        rs.getString("TRANGTHAI")
                 );
             }
         } catch (SQLException e) {
@@ -370,26 +393,6 @@ public class hoadonDAL {
         return result;
     }
 
-    // Thêm các phương thức mới
-    public boolean themChiTietHoaDon(ChiTietHoaDonDTO cthd) {
-        String sql = "INSERT INTO CHITIETHOADON (MAHOADON, MASP, SOLUONG, GIA) VALUES (?, ?, ?, ?)";
-        try {
-            conn = getConnection();
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, cthd.getMaHoaDon());
-            pst.setString(2, cthd.getMaSanPham());
-            pst.setInt(3, cthd.getSoLuong());
-            pst.setDouble(4, cthd.getGia());
-
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            closeResources();
-        }
-    }
-
     public boolean kiemTraMaHDTonTai(String maHD) {
         String sql = "SELECT 1 FROM HOADON WHERE MAHOADON = ?";
         try {
@@ -456,7 +459,7 @@ public class hoadonDAL {
             conn.setAutoCommit(false);
 
             // 1. Thêm hóa đơn chính
-            String sqlHD = "INSERT INTO HOADON (MAHOADON, MANHANVIEN, MAKH, NGAYBAN, THANHTIEN) VALUES (?, ?, ?, ?, ?)";
+            String sqlHD = "INSERT INTO HOADON (MAHOADON, MANHANVIEN, MAKH, NGAYBAN, THANHTIEN, TRANGTHAI) VALUES (?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement pstHD = conn.prepareStatement(sqlHD)) {
                 pstHD.setString(1, hd.getMaHoaDon());
@@ -464,13 +467,11 @@ public class hoadonDAL {
                 pstHD.setString(3, hd.getMaKH() == null || hd.getMaKH().isEmpty() ? null : hd.getMaKH());
                 pstHD.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
                 pstHD.setDouble(5, hd.getThanhTien());
+                pstHD.setString(6, hd.getTrangThai());
 
 
-                int rowsAffected = pstHD.executeUpdate();
-
-                if (rowsAffected <= 0) {
+                if (pstHD.executeUpdate() <= 0) {
                     conn.rollback();
-                    System.err.println("Lỗi: Không thể thêm hóa đơn chính");
                     return false;
                 }
             }
@@ -480,6 +481,13 @@ public class hoadonDAL {
 
             try (PreparedStatement pstCT = conn.prepareStatement(sqlCT)) {
                 for (ChiTietHoaDonDTO cthd : danhSachChiTiet) {
+
+                    // Trừ số lượng tồn kho trước
+                    if (!giamSoLuongSanPham(cthd.getMaSanPham(), cthd.getSoLuong(), conn)) {
+                        conn.rollback();
+                        return false;
+                    }
+
                     pstCT.setString(1, cthd.getMaHoaDon());
                     pstCT.setString(2, cthd.getMaSanPham());
                     pstCT.setInt(3, cthd.getSoLuong());
@@ -492,7 +500,6 @@ public class hoadonDAL {
                 for (int i = 0; i < results.length; i++) {
                     if (results[i] == Statement.EXECUTE_FAILED) {
                         conn.rollback();
-                        System.err.println("Lỗi: Thêm chi tiết thất bại tại vị trí " + i);
                         return false;
                     }
                 }
@@ -556,7 +563,7 @@ public class hoadonDAL {
             pstDeleteChiTiet.executeUpdate();
 
             // 3. Insert new details
-            String sqlInsertChiTiet = "INSERT INTO CHITIETHOADON (MaHoaDon, MaSanPham, SoLuong, Gia) VALUES (?, ?, ?, ?)";
+            String sqlInsertChiTiet = "INSERT INTO CHITIETHOADON (MaHoaDon, MaSP, SoLuong, Gia) VALUES (?, ?, ?, ?)";
             pstInsertChiTiet = connection.prepareStatement(sqlInsertChiTiet);
 
             for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
@@ -595,6 +602,64 @@ public class hoadonDAL {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    // Thêm vào hoadonDAL.java
+    private boolean giamSoLuongSanPham(String maSP, int soLuong, Connection conn) throws SQLException {
+        String sql = "UPDATE SANPHAM SET HANGTON = HANGTON - ? WHERE MASP = ? AND HANGTON >= ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, soLuong);
+            pst.setString(2, maSP);
+            pst.setInt(3, soLuong); // Đảm bảo số lượng tồn đủ để trừ
+            return pst.executeUpdate() > 0;
+        }
+    }
+
+    public boolean huyHoaDon(String maHoaDon) {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Lấy danh sách chi tiết
+            List<ChiTietHoaDonDTO> chiTiet = layChiTietHoaDon(maHoaDon);
+
+            // 2. Phục hồi số lượng tồn kho
+            for (ChiTietHoaDonDTO ct : chiTiet) {
+                String sql = "UPDATE SANPHAM SET HANGTON = HANGTON + ? WHERE MASP = ?";
+                try (PreparedStatement pst = conn.prepareStatement(sql)) {
+                    pst.setInt(1, ct.getSoLuong());
+                    pst.setString(2, ct.getMaSanPham());
+                    pst.executeUpdate();
+                }
+            }
+
+            // 3. Cập nhật trạng thái hóa đơn
+            String sqlUpdate = "UPDATE HOADON SET TRANGTHAI = 'DA_HUY' WHERE MAHOADON = ?";
+            try (PreparedStatement pst = conn.prepareStatement(sqlUpdate)) {
+                pst.setString(1, maHoaDon);
+                pst.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) {}
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.close(); } catch (SQLException e) {}
+        }
+    }
+
+    public boolean capNhatTrangThai(String maHoaDon, String trangThai) throws SQLException {
+        String sql = "UPDATE HOADON SET TRANGTHAI = ? WHERE MAHOADON = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, trangThai);
+            stmt.setString(2, maHoaDon);
+            return stmt.executeUpdate() > 0;
         }
     }
 }

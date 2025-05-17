@@ -9,17 +9,19 @@ public class HoaDonDTO {
 	private String maKH;
 	private Date ngayBan;
 	private double thanhTien;
+	private String trangThai; // mới thêm
 	private List<ChiTietHoaDonDTO> chiTietHoaDon;
 
 	public HoaDonDTO() {
 	}
 
-	public HoaDonDTO(String maHoaDon, String maNhanVien, String maKH, Date ngayBan, double thanhTien) {
+	public HoaDonDTO(String maHoaDon, String maNhanVien, String maKH, Date ngayBan, double thanhTien, String trangThai) {
 		this.maHoaDon = maHoaDon;
 		this.maNhanVien = maNhanVien;
 		this.maKH = maKH;
 		this.ngayBan = ngayBan;
 		this.thanhTien = thanhTien;
+		this.trangThai = trangThai;
 	}
 
 	// Getter và Setter
@@ -63,6 +65,15 @@ public class HoaDonDTO {
 		this.thanhTien = thanhTien;
 	}
 
+	// Getter/Setter cho trangThai
+	public String getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(String trangThai) {
+		this.trangThai = trangThai;
+	}
+
 	public List<ChiTietHoaDonDTO> getChiTietHoaDon() {
 		return chiTietHoaDon;
 	}
@@ -71,13 +82,9 @@ public class HoaDonDTO {
 		this.chiTietHoaDon = chiTietHoaDon;
 	}
 
-	// Thêm constructor mới
+	// Constructor cần sửa lại
 	public HoaDonDTO(String maHoaDon, String maNhanVien, String maKH, Date ngayBan) {
-		this.maHoaDon = maHoaDon;
-		this.maNhanVien = maNhanVien;
-		this.maKH = maKH;
-		this.ngayBan = ngayBan;
-		this.thanhTien = 0; // Khởi tạo thành tiền = 0
+		this(maHoaDon, maNhanVien, maKH, ngayBan, 0, "BINH_THUONG");
 	}
 
 }

@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dal.DatabaseHelper.getConnection;
+
 public class SanPhamDAL {
     private final String url = "jdbc:oracle:thin:@localhost:1521:orcl";
     private final String user = "c##Mthuda";
@@ -384,6 +386,17 @@ public class SanPhamDAL {
             if (shouldClose && conn != null) {
                 try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
+        }
+    }
+
+    // Thêm vào SanPhamDAL.java
+    public int getSoLuongTon(String maSP) throws SQLException {
+        String sql = "SELECT HANGTON FROM SANPHAM WHERE MASP = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, maSP);
+            ResultSet rs = pst.executeQuery();
+            return rs.next() ? rs.getInt("HANGTON") : 0;
         }
     }
 

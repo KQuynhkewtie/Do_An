@@ -161,32 +161,47 @@ public class TTCThd extends BaseFrame {
     }
 
     private void initDeleteButton() {
-        JButton btnXoa = createActionButton("Xóa hóa đơn", 850, 580, 150, 40);
-        btnXoa.addActionListener(e -> deleteHoaDon());
-        add(btnXoa);
+        JButton btnHuy = createActionButton("Hủy hóa đơn", 850, 580, 150, 40);
+        btnHuy.addActionListener(e -> huyHoaDon());
+        add(btnHuy);
     }
 
     private void initUpdateButton() {
         JButton btnCapNhat = createActionButton("Cập nhật", 870, 580, 150, 40);
         btnCapNhat.addActionListener(e -> {
+
+            HoaDonDTO hd = hdBLL.layHoaDonTheoMa(maHoaDon);
+            if (hd != null && "DA_HUY".equals(hd.getTrangThai())) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Không thể cập nhật hóa đơn đã hủy!",
+                        "Thông báo",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
             CapnhatttHD capNhatFrame = new CapnhatttHD(txtMaHD.getText());
 
-            // Tạo listener tạm
-            WindowListener listener = new WindowAdapter() {
+            // Thêm WindowListener để xử lý khi form cập nhật đóng
+            capNhatFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    capNhatFrame.removeWindowListener(this); // Quan trọng: xóa listener ngay sau dùng
-                    dispose();
-                    new TTCThd().loadHoaDonInfo(txtMaHD.getText());
-                    setVisible(true);
+                    // Tải lại dữ liệu khi quay về
+                    reloadData(txtMaHD.getText());
                 }
-            };
+            });
 
-            capNhatFrame.addWindowListener(listener);
             dispose();
             capNhatFrame.setVisible(true);
         });
         add(btnCapNhat);
+    }
+
+    // Thêm phương thức để tải lại dữ liệu
+    public void reloadData(String maHoaDon) {
+        this.maHoaDon = maHoaDon;
+        loadHoaDonData();
     }
 
     private void loadHoaDonData() {
@@ -199,6 +214,16 @@ public class TTCThd extends BaseFrame {
             txtMaKH.setText(hd.getMaKH() != null ? hd.getMaKH() : "Không có");
             txtNgay.setText(dateFormat.format(hd.getNgayBan()));
             txtThanhTien.setText(String.format("%,.0f VNĐ", hd.getThanhTien()));
+
+            // Thêm hiển thị trạng thái
+            String trangThai = "Bình thường";
+            if ("DA_HUY".equals(hd.getTrangThai())) {
+                trangThai = "Đã hủy";
+                // Có thể thay đổi màu sắc hoặc style để làm nổi bật
+                txtMaHD.setForeground(Color.RED);
+            } else {
+                txtMaHD.setForeground(Color.decode("#641A1F"));
+            }
 
             loadChiTietHoaDon();
         } else {
@@ -232,30 +257,41 @@ public class TTCThd extends BaseFrame {
         }
     }
 
-    private void deleteHoaDon() {
+    private void huyHoaDon() {
+        // Kiểm tra trạng thái hiện tại
+        HoaDonDTO hd = hdBLL.layHoaDonTheoMa(maHoaDon);
+        if (hd != null && "DA_HUY".equals(hd.getTrangThai())) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Hóa đơn này đã được hủy trước đó!",
+                    "Thông báo",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Bạn có chắc chắn muốn xóa hóa đơn này? Thao tác này không thể hoàn tác!",
-                "Xác nhận xóa",
+                "Bạn có chắc chắn muốn hủy hóa đơn này?",
+                "Xác nhận hủy",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            boolean result = hdBLL.xoaHoaDon(maHoaDon);
+            boolean result = hdBLL.huyHoaDon(maHoaDon);
             if (result) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Xóa hóa đơn thành công!",
+                        "Hủy hóa đơn thành công!",
                         "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE
                 );
-                dispose();
-                new HoaDon().setVisible(true);
+                loadHoaDonData(); // Tải lại dữ liệu để cập nhật trạng thái
             } else {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Xóa hóa đơn thất bại!",
+                        "Hủy hóa đơn thất bại!",
                         "Lỗi",
                         JOptionPane.ERROR_MESSAGE
                 );
