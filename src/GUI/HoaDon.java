@@ -318,12 +318,6 @@ public class HoaDon extends BaseFrame {
             };
             model.addRow(row);
         }
-
-//        // Sắp xếp lại để các hóa đơn đã hủy xuống dưới
-//        table.setRowSorter(new TableRowSorter<>(model));
-//        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-//        sortKeys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING)); // Sắp xếp theo cột trạng thái
-//        table.getRowSorter().setSortKeys(sortKeys);
     }
 
     public void refreshTable() {

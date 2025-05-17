@@ -8,6 +8,9 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.toedter.calendar.JDateChooser;
 import bll.HoaDonBLL;
 import dto.HoaDonDTO;
@@ -18,6 +21,7 @@ import dto.NhanVienDTO;
 import dto.KhachHangDTO;
 import dal.SanPhamDAL;
 import dto.SanPhamDTO;
+import helper.PDFGenerator;
 
 public class ThemHD extends BaseFrame {
     private DefaultTableModel tableModel;
@@ -493,7 +497,6 @@ public class ThemHD extends BaseFrame {
         dialog.setVisible(true);
     }
 
-    // In the ThemHD class, update the luuHoaDon method:
     private void luuHoaDon() {
         // Validate dữ liệu cơ bản
         String maHD = txtMaHD.getText().trim();
@@ -567,7 +570,55 @@ public class ThemHD extends BaseFrame {
 
 
         if (hdBLL.themHoaDonVoiChiTiet(hd, danhSachChiTiet)) {
-            JOptionPane.showMessageDialog(this, "Thêm hóa đơn thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+            // Đảm bảo dữ liệu được commit vào database
+            hdBLL.commitTransaction();
+
+            // Thông báo thành công và hỏi có muốn in hóa đơn không
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    "Thêm hóa đơn thành công! Bạn có muốn in hóa đơn không?",
+                    "In hóa đơn",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (option == JOptionPane.YES_OPTION) {
+                // Tạo một hóa đơn tạm từ dữ liệu hiện tại
+                HoaDonDTO tempHD = new HoaDonDTO(
+                        maHD,
+                        maNV,
+                        maKH.isEmpty() ? null : maKH,
+                        ngayLap,
+                        Double.parseDouble(txtThanhTien.getText().replace(",", "")),
+                        "BINH_THUONG"
+                );
+
+                // Tạo danh sách chi tiết tạm
+                List<ChiTietHoaDonDTO> tempChiTiet = new ArrayList<>();
+                for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    String maSP = tableModel.getValueAt(i, 0).toString();
+                    int soLuong = Integer.parseInt(tableModel.getValueAt(i, 2).toString());
+                    double gia = Double.parseDouble(tableModel.getValueAt(i, 3).toString());
+                    tempChiTiet.add(new ChiTietHoaDonDTO(maHD, maSP, soLuong, gia));
+                }
+
+                // Lấy danh sách tên sản phẩm
+                List<String> danhSachMaSP = tempChiTiet.stream()
+                        .map(ChiTietHoaDonDTO::getMaSanPham)
+                        .collect(Collectors.toList());
+                Map<String, String> tenSanPhamMap = hdBLL.layDanhSachTenSanPham(danhSachMaSP);
+
+                // Xuất PDF từ dữ liệu tạm
+                try {
+                    new PDFGenerator().exportHoaDonToPDF(this, tempHD, tempChiTiet, tenSanPhamMap);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Lỗi khi xuất PDF: " + ex.getMessage(),
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
             dispose();
             new HoaDon().setVisible(true);
         } else {

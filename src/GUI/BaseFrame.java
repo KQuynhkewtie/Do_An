@@ -227,30 +227,4 @@ public abstract class BaseFrame extends JFrame {
         add(btnExportExcel);
 
     }
-    // protected JTable createStyledTable(Object[][] data, String[] columns) {
-    // JTable table = new JTable(new DefaultTableModel(data, columns)) {
-    //     @Override
-    //     public boolean isCellEditable(int row, int column) {
-    //         return false;
-    //     }
-
-    //     @Override
-    //     public Component prepareRenderer(javax.swing.table.TableCellRenderer renderer, int row, int column) {
-    //         Component c = super.prepareRenderer(renderer, row, column);
-    //         if (!isRowSelected(row)) {
-    //             c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(240, 240, 240));
-    //         } else {
-    //             c.setBackground(new Color(200, 230, 255));
-    //         }
-    //         return c;
-    //     }
-    // };
-
-    // table.setRowHeight(28);
-    // JTableHeader header = table.getTableHeader();
-    // header.setFont(new Font("Arial", Font.BOLD, 15));
-    // return table;
-    // }
-
-
 }

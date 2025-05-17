@@ -2,288 +2,188 @@ package helper;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import dto.*;
-import bll.*;
-import java.awt.*;
-import java.awt.FileDialog;
-import java.io.*;
-import java.text.DecimalFormat;
+import dto.HoaDonDTO;
+import dto.ChiTietHoaDonDTO;
+import bll.HoaDonBLL;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import com.itextpdf.text.Font;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class PDFGenerator {
-    private static final DecimalFormat formatter = new DecimalFormat("###,###,###");
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private HoaDonBLL hdBLL = new HoaDonBLL();
 
-    private Font fontNormal;
-    private Font fontBold;
-    private Font fontTitle;
-    private Font fontBoldItalic;
+//    public void exportHoaDonToPDF(JFrame parentFrame, String maHoaDon) {
+//        if (maHoaDon == null || maHoaDon.trim().isEmpty()) {
+//            JOptionPane.showMessageDialog(parentFrame, "Không có hóa đơn để xuất!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+//            return;
+//        }
+//
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
+//        fileChooser.setSelectedFile(new File("HoaDon_" + maHoaDon + ".pdf"));
+//
+//        int userSelection = fileChooser.showSaveDialog(parentFrame);
+//
+//        if (userSelection == JFileChooser.APPROVE_OPTION) {
+//            File fileToSave = fileChooser.getSelectedFile();
+//            String filePath = fileToSave.getAbsolutePath();
+//            if (!filePath.toLowerCase().endsWith(".pdf")) {
+//                filePath += ".pdf";
+//            }
+//
+//            try {
+//                generatePDF(filePath, maHoaDon);
+//                JOptionPane.showMessageDialog(parentFrame,
+//                        "Xuất PDF thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+//            } catch (Exception ex) {
+//                JOptionPane.showMessageDialog(parentFrame,
+//                        "Lỗi khi xuất PDF: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+//                ex.printStackTrace();
+//            }
+//        }
+//    }
 
-    private JFrame parentFrame;
-    private FileDialog fileDialog;
-
-    public PDFGenerator (JFrame parentFrame) {
-        this.parentFrame = parentFrame;
-        this.fileDialog = new FileDialog(parentFrame, "Xuất hóa đơn PDF", FileDialog.SAVE);
-
-        try {
-            // Khởi tạo font Unicode (đảm bảo có file font trong thư mục fonts)
-            BaseFont baseFont = BaseFont.createFont("lib/Roboto/Roboto-Regular.ttf",
-                    BaseFont.IDENTITY_H,
-                    BaseFont.EMBEDDED);
-
-            fontNormal = new Font(baseFont, 12, Font.NORMAL);
-            fontBold = new Font(baseFont, 12, Font.BOLD);
-            fontTitle = new Font(baseFont, 18, Font.BOLD);
-            fontBoldItalic = new Font(baseFont, 12, Font.BOLDITALIC);
-        } catch (Exception e) {
-            // Fallback font nếu không tìm thấy font Unicode
-            fontNormal = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL);
-            fontBold = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
-            fontTitle = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
-            fontBoldItalic = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLDITALIC);
+    public void exportHoaDonToPDF(JFrame parentFrame,
+                                  HoaDonDTO hd,
+                                  List<ChiTietHoaDonDTO> chiTiet,
+                                  Map<String, String> tenSanPhamMap) {
+        if (hd == null || chiTiet == null) {
+            JOptionPane.showMessageDialog(parentFrame,
+                    "Dữ liệu hóa đơn không hợp lệ!",
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    }
 
-    public boolean exportInvoice(String maHoaDon) {
-        String filePath = showSaveDialog("HD_" + maHoaDon);
-        if (filePath == null) {
-            return false; // Người dùng hủy
-        }
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
+        fileChooser.setSelectedFile(new File("HoaDon_" + hd.getMaHoaDon() + ".pdf"));
 
-        if (!filePath.toLowerCase().endsWith(".pdf")) {
-            filePath += ".pdf";
-        }
+        int userSelection = fileChooser.showSaveDialog(parentFrame);
 
-        try {
-            // Lấy thông tin từ các BLL
-            HoaDonBLL hoaDonBLL = new HoaDonBLL();
-            KhachHangBLL khachHangBLL = new KhachHangBLL();
-            NhanVienBLL nhanVienBLL = new NhanVienBLL();
-            SanPhamBLL sanPhamBLL = new SanPhamBLL();
-
-            // Lấy thông tin hóa đơn
-            HoaDonDTO hoaDon = hoaDonBLL.layHoaDonTheoMa(maHoaDon);
-            if (hoaDon == null) {
-                JOptionPane.showMessageDialog(parentFrame, "Không tìm thấy hóa đơn " + maHoaDon);
-                return false;
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".pdf")) {
+                filePath += ".pdf";
             }
 
-            // Lấy thông tin khách hàng
-            KhachHangDTO khachHang = khachHangBLL.getKhachHangById(hoaDon.getMaKH());
-
-            // Lấy thông tin nhân viên
-            NhanVienDTO nhanVien = nhanVienBLL.getNhanVienTheoMa(hoaDon.getMaNhanVien());
-
-            // Lấy chi tiết hóa đơn
-            List<ChiTietHoaDonDTO> chiTietHoaDon = hoaDonBLL.layChiTietHoaDon(maHoaDon);
-
-            // Tạo tài liệu PDF
-            Document document = new Document();
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filePath));
-            document.open();
-
-            // Thêm thông tin công ty
-            addCompanyInfo(document);
-
-            // Thêm tiêu đề hóa đơn
-            addInvoiceHeader(document);
-
-            // Thêm thông tin hóa đơn
-            addInvoiceInfo(document, hoaDon, nhanVien, khachHang);
-
-            // Thêm chi tiết sản phẩm
-            addProductDetails(document, chiTietHoaDon, sanPhamBLL);
-
-            // Thêm tổng thanh toán
-            addPaymentInfo(document, hoaDon);
-
-            // Thêm chỗ ký
-            addSignatureSection(document);
-
-            document.close();
-            writer.close();
-
-            // Mở file sau khi tạo
-            openFile(filePath);
-
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(parentFrame, "Lỗi khi xuất hóa đơn: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private String showSaveDialog(String defaultFileName) {
-        fileDialog.setFile(defaultFileName + ".pdf");
-        fileDialog.setVisible(true);
-
-        String directory = fileDialog.getDirectory();
-        String fileName = fileDialog.getFile();
-
-        if (directory == null || fileName == null) {
-            return null; // Người dùng hủy
-        }
-
-        return directory + fileName;
-    }
-
-    private void openFile(String filePath) {
-        try {
-            File file = new File(filePath);
-            if (file.exists()) {
-                Desktop.getDesktop().open(file);
+            try {
+                generatePDFFromData(filePath, hd, chiTiet, tenSanPhamMap);
+                JOptionPane.showMessageDialog(parentFrame,
+                        "Xuất PDF thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(parentFrame,
+                        "Lỗi khi xuất PDF: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(parentFrame, "Không thể mở file: " + e.getMessage());
         }
     }
 
-    private void addCompanyInfo(Document document) throws DocumentException {
-        Paragraph companyInfo = new Paragraph();
-        companyInfo.add(new Chunk("NHÀ THUỐC AN TÂM", fontBold));
-        companyInfo.add(Chunk.NEWLINE);
-        companyInfo.add(new Chunk("Địa chỉ: 123 Đường Sức Khỏe, Quận 5, TP.HCM", fontNormal));
-        companyInfo.add(Chunk.NEWLINE);
-        companyInfo.add(new Chunk("Điện thoại: 0909 123 456 - MST: 1234567890", fontNormal));
-        companyInfo.add(Chunk.NEWLINE);
-        companyInfo.add(new Chunk("Email: lienhe@nhathuocantam.vn", fontNormal));
-        companyInfo.add(Chunk.NEWLINE);
-        companyInfo.add(new Chunk("Ngày xuất: " + dateFormat.format(new Date()), fontNormal));
-        companyInfo.setAlignment(Element.ALIGN_LEFT);
-        document.add(companyInfo);
-        document.add(Chunk.NEWLINE);
-    }
+    private void generatePDFFromData(String filePath,
+                                     HoaDonDTO hd,
+                                     List<ChiTietHoaDonDTO> chiTiet,
+                                     Map<String, String> tenSanPhamMap) throws Exception {
+        Document document = new Document();
+        PdfWriter.getInstance(document, new FileOutputStream(filePath));
+        document.open();
 
-    private void addInvoiceHeader(Document document) throws DocumentException {
+        // Font Unicode (sử dụng font mặc định của hệ thống)
+        BaseFont bf = BaseFont.createFont(
+                "c:/windows/fonts/times.ttf",  // Đường dẫn font Times New Roman
+                BaseFont.IDENTITY_H,
+                BaseFont.EMBEDDED
+        );
+
+        Font fontTitle = new Font(bf, 18, Font.BOLD);
+        Font fontHeader = new Font(bf, 14, Font.BOLD);
+        Font fontNormal = new Font(bf, 12, Font.NORMAL);
+
+        // Tiêu đề
         Paragraph title = new Paragraph("HÓA ĐƠN BÁN HÀNG", fontTitle);
         title.setAlignment(Element.ALIGN_CENTER);
-        title.setSpacingAfter(20);
+        title.setSpacingAfter(20f);
         document.add(title);
-    }
 
-    private void addInvoiceInfo(Document document, HoaDonDTO hoaDon,
-                                NhanVienDTO nhanVien, KhachHangDTO khachHang)
-            throws DocumentException {
-        Paragraph info = new Paragraph();
-        info.add(new Chunk("Mã hóa đơn: " + hoaDon.getMaHoaDon(), fontBold));
-        info.add(Chunk.NEWLINE);
-        info.add(new Chunk("Ngày bán: " + dateFormat.format(hoaDon.getNgayBan()), fontNormal));
-        info.add(Chunk.NEWLINE);
-        info.add(new Chunk("Nhân viên: " + nhanVien.getHoTen() + " (Mã NV: " + hoaDon.getMaNhanVien() + ")", fontNormal));
-        info.add(Chunk.NEWLINE);
-        info.add(new Chunk("Khách hàng: " + khachHang.getHoTen() + " (" + khachHang.getLoaiKhach() + " - " +
-                khachHang.getDiemTichLuy() + " điểm)", fontNormal));
-        info.add(Chunk.NEWLINE);
-        info.setAlignment(Element.ALIGN_LEFT);
-        document.add(info);
-        document.add(Chunk.NEWLINE);
+        // Thông tin hóa đơn
+        PdfPTable infoTable = new PdfPTable(2);
+        infoTable.setWidthPercentage(100);
+        infoTable.setSpacingBefore(10f);
+        infoTable.setSpacingAfter(10f);
 
-        // Đường kẻ ngang
-        addSeparator(document);
-    }
+        addCell(infoTable, "Mã hóa đơn:", fontHeader);
+        addCell(infoTable, hd.getMaHoaDon(), fontNormal);
+        addCell(infoTable, "Mã nhân viên:", fontHeader);
+        addCell(infoTable, hd.getMaNhanVien(), fontNormal);
+        addCell(infoTable, "Mã khách hàng:", fontHeader);
+        addCell(infoTable, hd.getMaKH() != null ? hd.getMaKH() : "Không có", fontNormal);
+        addCell(infoTable, "Ngày lập:", fontHeader);
+        addCell(infoTable, new SimpleDateFormat("dd/MM/yyyy").format(hd.getNgayBan()), fontNormal);
+        addCell(infoTable, "Trạng thái:", fontHeader);
+        addCell(infoTable, "DA_HUY".equals(hd.getTrangThai()) ? "Đã hủy" : "Bình thường", fontNormal);
 
-    private void addProductDetails(Document document, List<ChiTietHoaDonDTO> chiTietHoaDon,
-                                   SanPhamBLL sanPhamBLL) throws DocumentException {
-        Paragraph title = new Paragraph("CHI TIẾT SẢN PHẨM", fontBold);
-        title.setAlignment(Element.ALIGN_LEFT);
-        document.add(title);
-        document.add(Chunk.NEWLINE);
+        document.add(infoTable);
 
-        PdfPTable table = new PdfPTable(6); // 6 cột
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{1f, 3f, 2f, 2f, 2f, 2f});
+        // Danh sách sản phẩm
+        Paragraph productTitle = new Paragraph("DANH SÁCH SẢN PHẨM", fontHeader);
+        productTitle.setAlignment(Element.ALIGN_CENTER);
+        productTitle.setSpacingBefore(20f);
+        productTitle.setSpacingAfter(10f);
+        document.add(productTitle);
 
-        // Tiêu đề bảng
-        addTableHeaderCell(table, "STT");
-        addTableHeaderCell(table, "Tên thuốc");
-        addTableHeaderCell(table, "Đóng gói");
-        addTableHeaderCell(table, "Đơn giá");
-        addTableHeaderCell(table, "Số lượng");
-        addTableHeaderCell(table, "Thành tiền");
+        PdfPTable productTable = new PdfPTable(5);
+        productTable.setWidthPercentage(100);
+        productTable.setSpacingAfter(20f);
 
-        // Thêm dữ liệu
-        int stt = 1;
-        for (ChiTietHoaDonDTO cthd : chiTietHoaDon) {
-            SanPhamDTO sanPham = sanPhamBLL.getSanPhamById(cthd.getMaSanPham());
+        // Header
+        addCell(productTable, "Mã SP", fontHeader);
+        addCell(productTable, "Tên sản phẩm", fontHeader);
+        addCell(productTable, "Số lượng", fontHeader);
+        addCell(productTable, "Đơn giá", fontHeader);
+        addCell(productTable, "Thành tiền", fontHeader);
 
-            addTableCell(table, String.valueOf(stt++), Element.ALIGN_CENTER);
-            addTableCell(table, sanPham.getTenSP(), Element.ALIGN_LEFT);
-            addTableCell(table, sanPham.getQuyCachDongGoi(), Element.ALIGN_LEFT);
-            addTableCell(table, formatter.format(cthd.getGia()) + "đ", Element.ALIGN_RIGHT);
-            addTableCell(table, String.valueOf(cthd.getSoLuong()), Element.ALIGN_CENTER);
-            addTableCell(table, formatter.format(cthd.getGia() * cthd.getSoLuong()) + "đ", Element.ALIGN_RIGHT);
+        // Dữ liệu
+        for (ChiTietHoaDonDTO ct : chiTiet) {
+            String tenSP = tenSanPhamMap.getOrDefault(ct.getMaSanPham(), "Không xác định");
+            double thanhTien = ct.getSoLuong() * ct.getGia();
+
+            addCell(productTable, ct.getMaSanPham(), fontNormal);
+            addCell(productTable, tenSP, fontNormal);
+            addCell(productTable, String.valueOf(ct.getSoLuong()), fontNormal);
+            addCell(productTable, formatCurrency(ct.getGia()), fontNormal);
+            addCell(productTable, formatCurrency(thanhTien), fontNormal);
         }
 
-        document.add(table);
-        document.add(Chunk.NEWLINE);
+        document.add(productTable);
 
-        // Đường kẻ ngang
-        addSeparator(document);
+        // Tổng tiền
+        Paragraph total = new Paragraph("TỔNG CỘNG: " + formatCurrency(hd.getThanhTien()), fontHeader);
+        total.setAlignment(Element.ALIGN_RIGHT);
+        total.setSpacingBefore(10f);
+        document.add(total);
+
+        // Ký tên
+        Paragraph signature = new Paragraph("\n\n\n\nNgười lập\n(Ký và ghi rõ họ tên)", fontNormal);
+        signature.setAlignment(Element.ALIGN_RIGHT);
+        document.add(signature);
+
+        document.close();
     }
 
-    private void addPaymentInfo(Document document, HoaDonDTO hoaDon) throws DocumentException {
-        Paragraph payment = new Paragraph();
-        payment.add(new Chunk("Tổng cộng: ", fontNormal));
-        payment.add(new Chunk(formatter.format(hoaDon.getThanhTien()) + "đ", fontBold));
-        payment.add(Chunk.NEWLINE);
-        payment.add(new Chunk("Giảm giá: ", fontNormal));
-        payment.add(new Chunk(formatter.format(0) + "đ", fontBold)); // Có thể thay bằng hoaDon.getGiamGia() nếu có
-        payment.add(Chunk.NEWLINE);
-        payment.add(new Chunk("VAT (nếu có): ", fontNormal));
-        payment.add(new Chunk(formatter.format(0) + "đ", fontBold)); // Có thể thay bằng hoaDon.getVAT() nếu có
-        payment.add(Chunk.NEWLINE);
-        payment.add(new Chunk("Khách phải trả: ", fontBold));
-        payment.add(new Chunk(formatter.format(hoaDon.getThanhTien()) + "đ", fontBold));
-        payment.setAlignment(Element.ALIGN_RIGHT);
-        document.add(payment);
-        document.add(Chunk.NEWLINE);
-    }
-
-    private void addSignatureSection(Document document) throws DocumentException {
-        Paragraph signatures = new Paragraph();
-        signatures.add(new Chunk("Người lập phiếu", fontBoldItalic));
-        signatures.add(Chunk.NEWLINE);
-        signatures.add(new Chunk("(Ký và ghi rõ họ tên)", fontNormal));
-
-        document.add(signatures);
-    }
-
-    private void addTableHeaderCell(PdfPTable table, String text) {
-        PdfPCell cell = new PdfPCell(new Phrase(text, fontBold));
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setBackgroundColor(new BaseColor(220, 220, 220)); // Màu nền xám nhạt
+    private void addCell(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setPadding(5);
+        cell.setBorderColor(BaseColor.LIGHT_GRAY);
         table.addCell(cell);
     }
 
-    private void addTableCell(PdfPTable table, String text, int alignment) {
-        PdfPCell cell = new PdfPCell(new Phrase(text, fontNormal));
-        cell.setHorizontalAlignment(alignment);
-        cell.setPadding(5);
-        table.addCell(cell);
-    }
-
-    private void addSeparator(Document document) throws DocumentException {
-        Paragraph separator = new Paragraph("---------------------------------------------------"
-                + "-------------------------------------");
-        separator.setAlignment(Element.ALIGN_CENTER);
-        document.add(separator);
-        document.add(Chunk.NEWLINE);
-    }
-
-    // Hàm tiện ích tạo khoảng trắng
-    private static Chunk createWhiteSpace(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(" ");
-        }
-        return new Chunk(builder.toString());
+    private String formatCurrency(double amount) {
+        return String.format("%,.0f VNĐ", amount);
     }
 }

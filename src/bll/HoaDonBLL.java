@@ -1,17 +1,36 @@
 package bll;
 
+import dal.DatabaseHelper;
 import dal.SanPhamDAL;
 import dal.hoadonDAL;
 import dto.ChiTietHoaDonDTO;
 import dto.HoaDonDTO;
 
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class HoaDonBLL {
     private hoadonDAL hdDAL = new hoadonDAL();
+    private Connection connection;
+
+    public HoaDonBLL() {
+        try {
+            this.connection = DatabaseHelper.getConnection();
+            this.hdDAL.setConnection(this.connection);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Không thể kết nối database: " + e.getMessage());
+        }
+    }
+
+    // Thêm phương thức đóng kết nối
+    public void closeConnection() {
+        DatabaseHelper.closeConnection(this.connection);
+    }
 
     // Các phương thức tính doanh thu (giữ nguyên từ code cũ)
     public double tinhDoanhThuTheoNgay(Date ngay) {
@@ -87,19 +106,48 @@ public class HoaDonBLL {
 
     // Thêm các phương thức mới
     public boolean themHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
-        // Kiểm tra số lượng tồn kho trước
-        if (!kiemTraSoLuongTonKho(danhSachChiTiet)) {
-            JOptionPane.showMessageDialog(null, "Một số sản phẩm không đủ số lượng tồn kho!");
+        try {
+            // Bắt đầu transaction
+            connection.setAutoCommit(false);
+
+            // Kiểm tra số lượng tồn kho
+            if (!kiemTraSoLuongTonKho(danhSachChiTiet)) {
+                JOptionPane.showMessageDialog(null, "Một số sản phẩm không đủ số lượng tồn kho!");
+                connection.rollback();
+                return false;
+            }
+
+            // Tính tổng tiền
+            double tongTien = danhSachChiTiet.stream()
+                    .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
+                    .sum();
+            hd.setThanhTien(tongTien);
+
+            // Thêm hóa đơn và chi tiết
+            boolean result = hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
+
+            if (result) {
+                connection.commit();
+                return true;
+            } else {
+                connection.rollback();
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-        // Tính tổng tiền
-        double tongTien = danhSachChiTiet.stream()
-                .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
-                .sum();
-        hd.setThanhTien(tongTien);
-
-        return hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
     }
 
     private boolean kiemTraSoLuongTonKho(List<ChiTietHoaDonDTO> danhSachChiTiet) {
@@ -218,5 +266,21 @@ public class HoaDonBLL {
         }
     }
 
-
+    public void commitTransaction() {
+        try {
+            if (connection != null && !connection.getAutoCommit()) {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }

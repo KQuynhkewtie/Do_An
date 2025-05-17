@@ -3,6 +3,9 @@ package GUI;
 import bll.HoaDonBLL;
 import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
+import helper.JTableExporter;
+import helper.PDFGenerator;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -297,6 +300,60 @@ public class TTCThd extends BaseFrame {
                 );
             }
         }
+    }
+
+    protected void addPDFButton() {
+        ImageIcon iconPDF = new ImageIcon(getClass().getClassLoader().getResource("image/pdf-icon.png"));
+        Image imgPDF = iconPDF.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        ImageIcon resizedIconPDF = new ImageIcon(imgPDF);
+
+        JButton btnExportPDF = new JButton(resizedIconPDF);
+        btnExportPDF.setBounds(970, 65, 40, 40);
+
+        btnExportPDF.setBackground(null);
+        btnExportPDF.setBorderPainted(false);
+        btnExportPDF.setFocusPainted(false);
+        btnExportPDF.setContentAreaFilled(false);
+        btnExportPDF.setOpaque(true);
+        btnExportPDF.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        btnExportPDF.addActionListener(e -> {
+            if (maHoaDon == null || maHoaDon.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Không có hóa đơn để xuất!",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Lấy thông tin hóa đơn từ database
+            HoaDonDTO hd = hdBLL.layHoaDonTheoMa(maHoaDon);
+            if (hd == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Không tìm thấy hóa đơn!",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Lấy chi tiết hóa đơn
+            List<ChiTietHoaDonDTO> chiTiet = hdBLL.layChiTietHoaDon(maHoaDon);
+            if (chiTiet == null || chiTiet.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Hóa đơn không có chi tiết!",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Lấy danh sách tên sản phẩm
+            List<String> danhSachMaSP = chiTiet.stream()
+                    .map(ChiTietHoaDonDTO::getMaSanPham)
+                    .collect(Collectors.toList());
+            Map<String, String> tenSanPhamMap = hdBLL.layDanhSachTenSanPham(danhSachMaSP);
+
+            // Gọi phương thức xuất PDF với đầy đủ tham số
+            new PDFGenerator().exportHoaDonToPDF(this, hd, chiTiet, tenSanPhamMap);
+        });
+
+        add(btnExportPDF);
     }
 
     public static void main(String[] args) {

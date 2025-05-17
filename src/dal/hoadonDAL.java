@@ -4,19 +4,22 @@ import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
 import java.sql.*;
 import java.util.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import dal.DatabaseHelper;
 
 public class hoadonDAL {
-    private final String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String user = "c##Mthuda";
-    private final String pass = "Minhthu05#";
     private Connection conn;
     private PreparedStatement pst;
     private ResultSet rs;
+    private DatabaseHelper dtb;
 
     // Kết nối database
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+    public void setConnection(Connection connection) {
+        this.conn = connection;
     }
 
     // Lấy danh sách hóa đơn
@@ -25,7 +28,7 @@ public class hoadonDAL {
         String sql = "SELECT * FROM HOADON";
 
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             rs = pst.executeQuery();
 
@@ -53,7 +56,7 @@ public class hoadonDAL {
         String sql = "INSERT INTO HOADON (MAHOADON, MANHANVIEN, MAKH, NGAYBAN, THANHTIEN) VALUES (?, ?, ?, ?, ?)";
 
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, hd.getMaHoaDon());
             pst.setString(2, hd.getMaNhanVien());
@@ -121,7 +124,7 @@ public class hoadonDAL {
         }
 
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql.toString());
             // Xử lý tham số
             int paramIndex = 1;
@@ -189,7 +192,7 @@ public class hoadonDAL {
         String sql = "SELECT * FROM CHITIETHOADON WHERE MAHOADON = ?";
 
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maHoaDon);
             rs = pst.executeQuery();
@@ -215,7 +218,7 @@ public class hoadonDAL {
     public double getDoanhThuTheoNgay(java.util.Date ngay) {
         String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE TRUNC(NGAYBAN) = TRUNC(?) AND TRANGTHAI = 'BINH_THUONG'";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setDate(1, new java.sql.Date(ngay.getTime()));
 
@@ -235,7 +238,7 @@ public class hoadonDAL {
         String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON " +
                 "WHERE EXTRACT(MONTH FROM NGAYBAN) = ? AND EXTRACT(YEAR FROM NGAYBAN) = ? AND TRANGTHAI = 'BINH_THUONG'";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setInt(1, thang);
             pst.setInt(2, nam);
@@ -255,7 +258,7 @@ public class hoadonDAL {
     public double getDoanhThuTheoNam(int nam) {
         String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE EXTRACT(YEAR FROM NGAYBAN) = ? AND TRANGTHAI = 'BINH_THUONG'";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setInt(1, nam);
 
@@ -276,7 +279,7 @@ public class hoadonDAL {
                 "(SELECT SUM(ct.SOLUONG * ct.GIA) FROM CHITIETHOADON ct WHERE ct.MAHOADON = hd.MAHOADON) " +
                 "WHERE hd.MAHOADON = ?";
 
-        try (Connection conn = getConnection();
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maHoaDon);
             return pst.executeUpdate() > 0;
@@ -289,7 +292,7 @@ public class hoadonDAL {
     public HoaDonDTO layHoaDonTheoMa(String maHoaDon) {
         String sql = "SELECT * FROM HOADON WHERE MAHOADON = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maHoaDon);
             rs = pst.executeQuery();
@@ -315,7 +318,7 @@ public class hoadonDAL {
     public boolean xoaHoaDon(String maHoaDon) {
         String sql = "DELETE FROM HOADON WHERE MAHOADON = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maHoaDon);
             return pst.executeUpdate() > 0;
@@ -330,7 +333,7 @@ public class hoadonDAL {
     public boolean xoaTatCaChiTietHoaDon(String maHoaDon) {
         String sql = "DELETE FROM CHITIETHOADON WHERE MAHOADON = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maHoaDon);
             return pst.executeUpdate() > 0;
@@ -345,7 +348,7 @@ public class hoadonDAL {
     public String layTenSanPham(String maSanPham) {
         String sql = "SELECT TENSP FROM SANPHAM WHERE MASP = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maSanPham);
             rs = pst.executeQuery();
@@ -372,7 +375,7 @@ public class hoadonDAL {
         String sql = "SELECT MASP, TENSP FROM SANPHAM WHERE MASP IN (" + placeholders + ")";
 
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
 
             // Thiết lập các tham số
@@ -396,7 +399,7 @@ public class hoadonDAL {
     public boolean kiemTraMaHDTonTai(String maHD) {
         String sql = "SELECT 1 FROM HOADON WHERE MAHOADON = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maHD);
             rs = pst.executeQuery();
@@ -412,7 +415,7 @@ public class hoadonDAL {
     public boolean kiemTraNhanVienTonTai(String maNV) {
         String sql = "SELECT 1 FROM NHANVIEN WHERE MANHANVIEN = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maNV);
             rs = pst.executeQuery();
@@ -428,7 +431,7 @@ public class hoadonDAL {
     public boolean kiemTraKhachHangTonTai(String maKH) {
         String sql = "SELECT 1 FROM KHACHHANG WHERE MAKH = ?";
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
             pst.setString(1, maKH);
             rs = pst.executeQuery();
@@ -455,7 +458,7 @@ public class hoadonDAL {
     public boolean themHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
         Connection conn = null;
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
             // 1. Thêm hóa đơn chính
@@ -619,7 +622,7 @@ public class hoadonDAL {
     public boolean huyHoaDon(String maHoaDon) {
         Connection conn = null;
         try {
-            conn = getConnection();
+            conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
             // 1. Lấy danh sách chi tiết
@@ -650,16 +653,6 @@ public class hoadonDAL {
             return false;
         } finally {
             if (conn != null) try { conn.close(); } catch (SQLException e) {}
-        }
-    }
-
-    public boolean capNhatTrangThai(String maHoaDon, String trangThai) throws SQLException {
-        String sql = "UPDATE HOADON SET TRANGTHAI = ? WHERE MAHOADON = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, trangThai);
-            stmt.setString(2, maHoaDon);
-            return stmt.executeUpdate() > 0;
         }
     }
 }
