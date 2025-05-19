@@ -1,39 +1,33 @@
 package dal;
 
-
 import dto.SanPhamDTO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dal.DatabaseHelper.getConnection;
-
 public class SanPhamDAL {
-    private final String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String user = "c##Mthuda";
-    private final String pass = "Minhthu05#";
 
     // Lấy danh sách tất cả sản phẩm
     public List<SanPhamDTO> getAllSanPham() {
         List<SanPhamDTO> danhSachSP = new ArrayList<>();
         String sql = "SELECT * FROM SANPHAM";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 SanPhamDTO sp = new SanPhamDTO(
-                    rs.getString("MASP"),
-                    rs.getString("MAHSX"),
-                    rs.getString("MALSP"),
-                    rs.getString("TENSP"),
-                    rs.getString("QUYCACHDONGGOI"),
-                    rs.getString("SOLO"),
-                    rs.getString("SODANGKY"),
-                    rs.getDate("HSD"),
-                    rs.getInt("HANGTON"),
-                    rs.getDouble("GIABAN")
+                        rs.getString("MASP"),
+                        rs.getString("MAHSX"),
+                        rs.getString("MALSP"),
+                        rs.getString("TENSP"),
+                        rs.getString("QUYCACHDONGGOI"),
+                        rs.getString("SOLO"),
+                        rs.getString("SODANGKY"),
+                        rs.getDate("HSD"),
+                        rs.getInt("HANGTON"),
+                        rs.getDouble("GIABAN")
                 );
                 danhSachSP.add(sp);
             }
@@ -42,28 +36,28 @@ public class SanPhamDAL {
         }
         return danhSachSP;
     }
-    
+
     public SanPhamDTO getSanPhamById(String maSP) {
         SanPhamDTO sp = null;
         String query = "SELECT * FROM SANPHAM WHERE MASP = ?";
-        
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
-            PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, maSP);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 sp = new SanPhamDTO(
-                    rs.getString("MASP"),
-                    rs.getString("MAHSX"),
-                    rs.getString("MALSP"),
-                    rs.getString("TENSP"),
-                    rs.getString("QUYCACHDONGGOI"),
-                    rs.getString("SOLO"),
-                    rs.getString("SODANGKY"),
-                    rs.getDate("HSD"),
-                    rs.getInt("HANGTON"),
-                    rs.getDouble("GIABAN")
+                        rs.getString("MASP"),
+                        rs.getString("MAHSX"),
+                        rs.getString("MALSP"),
+                        rs.getString("TENSP"),
+                        rs.getString("QUYCACHDONGGOI"),
+                        rs.getString("SOLO"),
+                        rs.getString("SODANGKY"),
+                        rs.getDate("HSD"),
+                        rs.getInt("HANGTON"),
+                        rs.getDouble("GIABAN")
                 );
             }
         } catch (SQLException e) {
@@ -72,15 +66,14 @@ public class SanPhamDAL {
         return sp;
     }
 
-
     // Kiểm tra mã loại sản phẩm có tồn tại không
     public boolean existsMaLSP(String maLSP) {
         String sql = "SELECT COUNT(*) FROM LOAISANPHAM WHERE MALSP = ?";
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maLSP);
             System.out.println("Truy vấn kiểm tra MALSP: " + maLSP);
-            
+
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int count = rs.getInt(1);
@@ -96,7 +89,7 @@ public class SanPhamDAL {
     // Kiểm tra mã hãng sản xuất có tồn tại không
     private boolean existsMaHSX(String maHSX) {
         String sql = "SELECT 1 FROM HANGSANXUAT WHERE MAHSX = ?";
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maHSX);
             try (ResultSet rs = ps.executeQuery()) {
@@ -107,23 +100,12 @@ public class SanPhamDAL {
         }
         return false;
     }
-    
-    
-    // Thêm sản phẩm mới (kiểm tra mã loại sản phẩm & mã hãng sản xuất)
-    public boolean insertSanPham(SanPhamDTO sp) {
-//        if (!existsMaLSP(sp.getMaLSP())) {
-//            System.out.println("Mã loại sản phẩm không tồn tại!");
-//            return false;
-//        }
-//
-//        if (!existsMaHSX(sp.getMaHSX())) {
-//            System.out.println("Mã hãng sản xuất không tồn tại!");
-//            return false;
-//        }
 
+    // Thêm sản phẩm mới
+    public boolean insertSanPham(SanPhamDTO sp) {
         String sql = "INSERT INTO SANPHAM (MASP, MAHSX, MALSP, TENSP, QUYCACHDONGGOI, SOLO, SODANGKY, HSD, HANGTON, GIABAN) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sp.getMaSP());
             ps.setString(2, sp.getMaHSX());
@@ -133,7 +115,6 @@ public class SanPhamDAL {
             ps.setString(6, sp.getSoLo());
             ps.setString(7, sp.getSoDangKy());
 
-            // Chuyển đổi từ java.util.Date sang java.sql.Date
             if (sp.getHsd() != null) {
                 ps.setDate(8, new java.sql.Date(sp.getHsd().getTime()));
             } else {
@@ -143,19 +124,19 @@ public class SanPhamDAL {
             ps.setInt(9, sp.getHangTon());
             ps.setDouble(10, sp.getGiaBan());
 
-            return ps.executeUpdate() > 0;  // Trả về true nếu thêm thành công
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
-    
+
     // Lấy danh sách tất cả loại sản phẩm
     public List<String[]> getAllLoaiSanPham() {
         List<String[]> danhSachLSP = new ArrayList<>();
         String sql = "SELECT MALSP, TENLSP FROM LOAISANPHAM";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -173,7 +154,7 @@ public class SanPhamDAL {
         List<String[]> danhSachHSX = new ArrayList<>();
         String sql = "SELECT MAHSX, TENHSX FROM HANGSANXUAT";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -191,23 +172,23 @@ public class SanPhamDAL {
         List<SanPhamDTO> danhSachSP = new ArrayList<>();
         String sql = "SELECT * FROM SANPHAM WHERE LOWER(TENSP) LIKE ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword.toLowerCase() + "%");
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 SanPhamDTO sp = new SanPhamDTO(
-                    rs.getString("MASP"),
-                    rs.getString("MAHSX"),
-                    rs.getString("MALSP"),
-                    rs.getString("TENSP"),
-                    rs.getString("QUYCACHDONGGOI"),
-                    rs.getString("SOLO"),
-                    rs.getString("SODANGKY"),
-                    rs.getDate("HSD"),
-                    rs.getInt("HANGTON"),
-                    rs.getDouble("GIABAN")
+                        rs.getString("MASP"),
+                        rs.getString("MAHSX"),
+                        rs.getString("MALSP"),
+                        rs.getString("TENSP"),
+                        rs.getString("QUYCACHDONGGOI"),
+                        rs.getString("SOLO"),
+                        rs.getString("SODANGKY"),
+                        rs.getDate("HSD"),
+                        rs.getInt("HANGTON"),
+                        rs.getDouble("GIABAN")
                 );
                 danhSachSP.add(sp);
             }
@@ -220,10 +201,10 @@ public class SanPhamDAL {
     // Xóa sản phẩm theo tên
     public boolean deleteSanPhamByName(String tenSP) {
         String sql = "DELETE FROM SANPHAM WHERE TENSP = ?";
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, tenSP);
-            return ps.executeUpdate() > 0; // Trả về true nếu có ít nhất một sản phẩm bị xóa
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -232,23 +213,12 @@ public class SanPhamDAL {
 
     public boolean updateSanPham(SanPhamDTO sp) {
         String sql = "UPDATE SANPHAM SET MALSP=?, MAHSX=?, TENSP=?, QUYCACHDONGGOI=?, SOLO=?, SODANGKY=?, HSD=?, HANGTON=?, GIABAN=? WHERE TRIM(MASP) = ?";
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // Hiển thị thông tin sản phẩm trước khi thực hiện cập nhật
             System.out.println("Đang cập nhật sản phẩm: " + sp);
             System.out.println("Mã SP: " + sp.getMaSP());
-            System.out.println("1. TENSP: " + sp.getTenSP());
-            System.out.println("2. SOLUONG: " + sp.getHangTon());
-            System.out.println("3. DONGIA: " + sp.getGiaBan());
-            System.out.println("4. QCDG: " + sp.getQuyCachDongGoi());
-            System.out.println("5. Solo: " + sp.getSoDangKy());
-            System.out.println("6. Sodk: " + sp.getSoLo());
-            System.out.println("7. MALOAI: " + sp.getMaLSP());
-            System.out.println("8. MAhsx: " + sp.getMaHSX());
-            System.out.println("9. hsd: " + sp.getHsd());
 
-            // Set các giá trị vào PreparedStatement
             ps.setString(1, sp.getMaLSP());
             ps.setString(2, sp.getMaHSX());
             ps.setString(3, sp.getTenSP());
@@ -256,7 +226,6 @@ public class SanPhamDAL {
             ps.setString(5, sp.getSoLo());
             ps.setString(6, sp.getSoDangKy());
 
-            // Xử lý ngày hết hạn (HSD)
             if (sp.getHsd() != null) {
                 ps.setDate(7, new java.sql.Date(sp.getHsd().getTime()));
             } else {
@@ -265,24 +234,8 @@ public class SanPhamDAL {
 
             ps.setInt(8, sp.getHangTon());
             ps.setDouble(9, sp.getGiaBan());
-
-            // Set giá trị MASP cho phần WHERE, loại bỏ khoảng trắng dư
             ps.setString(10, sp.getMaSP().trim());
 
-            // Hiển thị giá trị truyền vào
-            System.out.println("Giá trị truyền vào UPDATE:");
-            System.out.println("1. TENSP: " + sp.getTenSP());
-            System.out.println("2. SOLUONG: " + sp.getHangTon());
-            System.out.println("3. DONGIA: " + sp.getGiaBan());
-            System.out.println("4. QCDG: " + sp.getQuyCachDongGoi());
-            System.out.println("5. Solo: " + sp.getSoDangKy());
-            System.out.println("6. Sodk: " + sp.getSoLo());
-            System.out.println("7. MALOAI: " + sp.getMaLSP());
-            System.out.println("8. MAhsx: " + sp.getMaHSX());
-            System.out.println("9. hsd: " + sp.getHsd());
-            System.out.println("10. MASP (WHERE): " + sp.getMaSP().trim());
-
-            // Thực hiện câu lệnh UPDATE và kiểm tra số lượng bản ghi bị ảnh hưởng
             int rows = ps.executeUpdate();
             System.out.println("Rows affected: " + rows);
 
@@ -295,10 +248,10 @@ public class SanPhamDAL {
         return false;
     }
 
- // Xóa sản phẩm theo mã
+    // Xóa sản phẩm theo mã
     public boolean deleteSanPhamById(String maSP) {
         String sql = "DELETE FROM SANPHAM WHERE MASP = ?";
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maSP);
             return ps.executeUpdate() > 0;
@@ -316,7 +269,7 @@ public class SanPhamDAL {
 
         try {
             if (conn == null) {
-                conn = DriverManager.getConnection(url, user, pass);
+                conn = DatabaseHelper.getConnection();
                 shouldClose = true;
             }
 
@@ -342,7 +295,7 @@ public class SanPhamDAL {
             e.printStackTrace();
         } finally {
             if (shouldClose && conn != null) {
-                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                DatabaseHelper.closeConnection(conn);
             }
         }
         return sp;
@@ -355,7 +308,7 @@ public class SanPhamDAL {
 
         try {
             if (conn == null) {
-                conn = DriverManager.getConnection(url, user, pass);
+                conn = DatabaseHelper.getConnection();
                 shouldClose = true;
             }
 
@@ -384,21 +337,18 @@ public class SanPhamDAL {
             return false;
         } finally {
             if (shouldClose && conn != null) {
-                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                DatabaseHelper.closeConnection(conn);
             }
         }
     }
 
-    // Thêm vào SanPhamDAL.java
     public int getSoLuongTon(String maSP) throws SQLException {
         String sql = "SELECT HANGTON FROM SANPHAM WHERE MASP = ?";
-        try (Connection conn = getConnection();
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, maSP);
             ResultSet rs = pst.executeQuery();
             return rs.next() ? rs.getInt("HANGTON") : 0;
         }
     }
-
-    
 }

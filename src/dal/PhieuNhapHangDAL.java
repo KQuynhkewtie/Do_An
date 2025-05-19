@@ -7,13 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhieuNhapHangDAL {
-    private final String url = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String user = "c##Mthuda";
-    private final String pass = "Minhthu05#";
-
 
     // Các phương thức public để BLL có thể gọi
-
     public boolean themPhieuNhapHang(PhieuNhapHangDTO pnh) {
         return themPhieuNhapHang(pnh, null);
     }
@@ -37,22 +32,23 @@ public class PhieuNhapHangDAL {
     public double tinhTongTienPhieuNhap(String maPNH) throws SQLException {
         return tinhTongTienPhieuNhap(maPNH, null);
     }
+
     // Lấy danh sách phiếu nhập hàng
     public List<PhieuNhapHangDTO> layDanhSachPhieuNhapHang() {
         List<PhieuNhapHangDTO> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM PHIEUNHAPHANG ORDER BY NGAYLAPPHIEU DESC";
-        
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            
+
             while (rs.next()) {
                 PhieuNhapHangDTO pnh = new PhieuNhapHangDTO(
-                    rs.getString("MAPNH"),
-                    rs.getString("MANCU"),
-                    rs.getString("MANHANVIEN"),
-                    rs.getDate("NGAYLAPPHIEU"),
-                    rs.getDouble("THANHTIEN")
+                        rs.getString("MAPNH"),
+                        rs.getString("MANCU"),
+                        rs.getString("MANHANVIEN"),
+                        rs.getDate("NGAYLAPPHIEU"),
+                        rs.getDouble("THANHTIEN")
                 );
                 danhSach.add(pnh);
             }
@@ -65,7 +61,7 @@ public class PhieuNhapHangDAL {
     public PhieuNhapHangDTO layPhieuNhapHangTheoMa(String maPNH) {
         String sql = "SELECT * FROM PHIEUNHAPHANG WHERE MAPNH = ?";
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, maPNH);
@@ -118,7 +114,6 @@ public class PhieuNhapHangDAL {
             return ps.executeUpdate() > 0;
         }
     }
-
 
     // Thêm các phương thức overload có tham số Connection
     public boolean capNhatPhieuNhapHang(PhieuNhapHangDTO pnh, Connection conn) throws SQLException {
@@ -225,29 +220,6 @@ public class PhieuNhapHangDAL {
         }
     }
 
-//    public double tinhTongTienPhieuNhap(String maPNH, Connection conn) {
-//        String sql = "SELECT SUM(SLNHAP * GIANHAP) AS TONGTIEN FROM CHITIETPHIEUNHAPHANG WHERE MAPNH = ?";
-//        double tongTien = 0;
-//        boolean shouldClose = conn == null;
-//
-//        try {
-//            if (conn == null) conn = DatabaseHelper.getConnection();
-//            PreparedStatement ps = conn.prepareStatement(sql);
-//
-//            ps.setString(1, maPNH);
-//            ResultSet rs = ps.executeQuery();
-//
-//            if (rs.next()) {
-//                tongTien = rs.getDouble("TONGTIEN");
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (shouldClose && conn != null) DatabaseHelper.closeConnection(conn);
-//        }
-//        return tongTien;
-//    }
-
     public boolean capNhatThanhTien(String maPNH, double thanhTien, Connection conn) throws SQLException {
         String sql = "UPDATE PHIEUNHAPHANG SET THANHTIEN = ? WHERE MAPNH = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -309,7 +281,7 @@ public class PhieuNhapHangDAL {
 
         sql.append(" ORDER BY NGAYLAPPHIEU DESC");
 
-        try (Connection conn = DriverManager.getConnection(url, user, pass);
+        try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int paramIndex = 1;
