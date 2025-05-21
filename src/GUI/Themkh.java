@@ -68,13 +68,13 @@ public class Themkh extends BaseFrame {
         JTextField txtHoTen = new JTextField();
         txtHoTen.setBounds(450, 170, 200, 30);
         add(txtHoTen);
-        //số lần mua
-        JLabel lblSoLanMua = new JLabel("Số lần mua:");
+        //số đt
+        JLabel lblSoLanMua = new JLabel("Số điện thoại:");
         lblSoLanMua.setBounds(270, 220, 150, 30);
         add(lblSoLanMua);
-        JTextField txtSoLanMua = new JTextField();
-        txtSoLanMua.setBounds(450, 220, 200, 30);
-        add(txtSoLanMua);
+        JTextField txtSDT = new JTextField();
+        txtSDT.setBounds(450, 220, 200, 30);
+        add(txtSDT);
         //điểm tích lũy
         JLabel lblDiemTL = new JLabel("Điểm tích lũy:");
         lblDiemTL.setBounds(270, 270, 150, 30);
@@ -102,14 +102,14 @@ public class Themkh extends BaseFrame {
                 try {
                 	 String maKH = txtMaKH.getText().trim();
                      String tenKH = txtHoTen.getText().trim();
-                     int Solan = Integer.parseInt(txtSoLanMua.getText().trim());
                      double DTL = Double.parseDouble(txtDiemTL.getText().trim());
                      String Loai = txtMaLoaiKH.getText().trim();
-                    
-                   
+                     String SDT = txtSDT.getText().trim();
+
+
 
                     // Tạo đối tượng sản phẩm
-                     KhachHangDTO kh = new KhachHangDTO(maKH, tenKH, Solan, DTL, Loai);
+                     KhachHangDTO kh = new KhachHangDTO(maKH, tenKH, DTL, Loai, SDT);
                     
                     System.out.println("Mã khách hàng lấy từ giao diện: [" + maKH + "]");
 
@@ -131,7 +131,7 @@ public class Themkh extends BaseFrame {
         getRootPane().setDefaultButton(btnLuu);
         setVisible(true);
         
-        JTextField[] textFields = { txtMaKH,txtHoTen, txtSoLanMua, txtDiemTL, txtMaLoaiKH};
+        JTextField[] textFields = { txtMaKH,txtHoTen, txtDiemTL, txtMaLoaiKH, txtSDT};
 
         for (int i = 0; i < textFields.length; i++) {
             final int currentIndex = i;

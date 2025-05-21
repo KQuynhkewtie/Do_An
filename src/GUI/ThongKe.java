@@ -236,7 +236,7 @@ public class ThongKe extends BaseFrame {
 
         // Các nút export nếu có
         addPDFButton();
-        addExceltButton();
+        //addExceltButton();
     }
 
     public static void main(String[] args) {

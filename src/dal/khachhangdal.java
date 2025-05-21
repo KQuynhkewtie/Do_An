@@ -18,9 +18,9 @@ public class khachhangdal {
                 KhachHangDTO kh = new KhachHangDTO(
                         rs.getString("MAKH"),
                         rs.getString("HOTEN"),
-                        rs.getInt("SOLANMUA"),
-                        rs.getDouble("DIEMTICHLUY"),
-                        rs.getString("MALOAIKH")
+                        rs.getInt("DIEMTICHLUY"),
+                        rs.getString("LOAIKHACH"),
+                        rs.getString("SDT")
                 );
                 ds.add(kh);
             }
@@ -43,9 +43,9 @@ public class khachhangdal {
                 kh = new KhachHangDTO(
                         rs.getString("MAKH"),
                         rs.getString("HOTEN"),
-                        rs.getInt("SOLANMUA"),
-                        rs.getDouble("DIEMTICHLUY"),
-                        rs.getString("LOAIKHACH")
+                        rs.getInt("DIEMTICHLUY"),
+                        rs.getString("LOAIKHACH"),
+                        rs.getString("SDT")
                 );
             }
         } catch (SQLException e) {
@@ -55,16 +55,16 @@ public class khachhangdal {
     }
 
     public boolean insertKhachHang(KhachHangDTO kh) {
-        String sql = "INSERT INTO KHACHHANG (MAKH, HOTEN, SOLANMUA, DIEMTICHLUY, LOAIKHACH) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO KHACHHANG (MAKH, HOTEN, DIEMTICHLUY, LOAIKHACH, SDT) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, kh.getMaKH());
             ps.setString(2, kh.getHoTen());
-            ps.setInt(3, kh.getSoLanMua());
-            ps.setDouble(4, kh.getDiemTichLuy());
-            ps.setString(5, kh.getLoaiKhach());
+            ps.setDouble(3, kh.getDiemTichLuy());
+            ps.setString(4, kh.getLoaiKhach());
+            ps.setString(5, kh.getSDT());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -86,9 +86,9 @@ public class khachhangdal {
                 KhachHangDTO kh = new KhachHangDTO(
                         rs.getString("MAKH"),
                         rs.getString("HOTEN"),
-                        rs.getInt("SOLANMUA"),
-                        rs.getDouble("DIEMTICHLUY"),
-                        rs.getString("LOAIKHACH")
+                        rs.getInt("DIEMTICHLUY"),
+                        rs.getString("LOAIKHACH"),
+                        rs.getString("SDT")
                 );
                 danhSachKH.add(kh);
             }
@@ -113,7 +113,7 @@ public class khachhangdal {
     }
 
     public boolean updateKhachHang(KhachHangDTO kh) {
-        String sql = "UPDATE KHACHHANG SET HOTEN=?, SOLANMUA=?, DIEMTICHLUY=?, LOAIKHACH=? WHERE TRIM(MAKH) = ?";
+        String sql = "UPDATE KHACHHANG SET HOTEN=?, DIEMTICHLUY=?, LOAIKHACH=?, SDT=? WHERE TRIM(MAKH) = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -121,21 +121,21 @@ public class khachhangdal {
             System.out.println("Đang cập nhật thông tin khách hàng: " + kh);
             System.out.println("Mã KH: " + kh.getMaKH());
             System.out.println("1. TENKH: " + kh.getHoTen());
-            System.out.println("2. SOLANMUA: " + kh.getSoLanMua());
-            System.out.println("3. DIEMTICHLUY: " + kh.getDiemTichLuy());
-            System.out.println("4. LOAIKHACH: " + kh.getLoaiKhach());
+            System.out.println("2. DIEMTICHLUY: " + kh.getDiemTichLuy());
+            System.out.println("3. LOAIKHACH: " + kh.getLoaiKhach());
+            System.out.println("4. SDT: " + kh.getSDT());
 
             ps.setString(1, kh.getHoTen());
-            ps.setInt(2, kh.getSoLanMua());
-            ps.setDouble(3, kh.getDiemTichLuy());
-            ps.setString(4, kh.getLoaiKhach());
-            ps.setString(5, kh.getMaKH().trim());
+            ps.setDouble(2, kh.getDiemTichLuy());
+            ps.setString(3, kh.getLoaiKhach());
+            ps.setString(4, kh.getMaKH().trim());
+            ps.setString(5, kh.getSDT());
 
             System.out.println("Giá trị truyền vào UPDATE:");
             System.out.println("1. HOTEN: " + kh.getHoTen());
-            System.out.println("2. SOLANMUA: " + kh.getSoLanMua());
-            System.out.println("3. DIEMTICHLUY: " + kh.getDiemTichLuy());
-            System.out.println("4. LOAIKHACH: " + kh.getLoaiKhach());
+            System.out.println("2. DIEMTICHLUY: " + kh.getDiemTichLuy());
+            System.out.println("3. LOAIKHACH: " + kh.getLoaiKhach());
+            System.out.println("4. SDT: " + kh.getSDT());
             System.out.println("5. MAKH (WHERE): " + kh.getMaKH().trim());
 
             int rows = ps.executeUpdate();

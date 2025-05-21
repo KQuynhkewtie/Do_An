@@ -5,6 +5,7 @@ import dto.ChiTietPhieuNhapHangDTO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Date;
 
 public class PhieuNhapHangDAL {
 
@@ -46,7 +47,7 @@ public class PhieuNhapHangDAL {
                 PhieuNhapHangDTO pnh = new PhieuNhapHangDTO(
                         rs.getString("MAPNH"),
                         rs.getString("MANCU"),
-                        rs.getString("MANHANVIEN"),
+                        rs.getString("MANV"),
                         rs.getDate("NGAYLAPPHIEU"),
                         rs.getDouble("THANHTIEN")
                 );
@@ -70,7 +71,7 @@ public class PhieuNhapHangDAL {
                     return new PhieuNhapHangDTO(
                             rs.getString("MAPNH"),
                             rs.getString("MANCU"),
-                            rs.getString("MANHANVIEN"),
+                            rs.getString("MANV"),
                             rs.getDate("NGAYLAPPHIEU"),
                             rs.getDouble("THANHTIEN")
                     );
@@ -84,7 +85,7 @@ public class PhieuNhapHangDAL {
 
     // Thêm phiếu nhập hàng
     public boolean themPhieuNhapHang(PhieuNhapHangDTO pnh, Connection conn) {
-        String sql = "INSERT INTO PHIEUNHAPHANG (MAPNH, MANCU, MANHANVIEN, NGAYLAPPHIEU, THANHTIEN) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO PHIEUNHAPHANG (MAPNH, MANCU, MANV, NGAYLAPPHIEU, THANHTIEN) VALUES (?, ?, ?, ?, ?)";
         boolean shouldClose = conn == null;
 
         try {
@@ -117,7 +118,7 @@ public class PhieuNhapHangDAL {
 
     // Thêm các phương thức overload có tham số Connection
     public boolean capNhatPhieuNhapHang(PhieuNhapHangDTO pnh, Connection conn) throws SQLException {
-        String sql = "UPDATE PHIEUNHAPHANG SET MANCU = ?, MANHANVIEN = ?, NGAYLAPPHIEU = ?, THANHTIEN = ? WHERE MAPNH = ?";
+        String sql = "UPDATE PHIEUNHAPHANG SET MANCU = ?, MANV = ?, NGAYLAPPHIEU = ?, THANHTIEN = ? WHERE MAPNH = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, pnh.getMaNCU());
             ps.setString(2, pnh.getMaNhanVien());
@@ -144,6 +145,8 @@ public class PhieuNhapHangDAL {
                 danhSach.add(new ChiTietPhieuNhapHangDTO(
                         rs.getString("MAPNH"),
                         rs.getString("MASP"),
+                        rs.getDate("HSD"),
+                        rs.getString("SOLO"),
                         rs.getInt("SLNHAP"),
                         rs.getDouble("GIANHAP")
                 ));
@@ -177,7 +180,7 @@ public class PhieuNhapHangDAL {
     }
 
     public boolean capNhatChiTietPhieuNhapHang(ChiTietPhieuNhapHangDTO ct, Connection conn) {
-        String sql = "UPDATE CHITIETPHIEUNHAPHANG SET SLNHAP = ?, GIANHAP = ? WHERE MAPNH = ? AND MASP = ?";
+        String sql = "UPDATE CHITIETPHIEUNHAPHANG SET SLNHAP = ?, GIANHAP = ?, HSD = ?, SOLO = ? WHERE MAPNH = ? AND MASP = ?";
         boolean shouldClose = conn == null;
 
         try {
@@ -186,8 +189,10 @@ public class PhieuNhapHangDAL {
 
             ps.setInt(1, ct.getSoLuongNhap());
             ps.setDouble(2, ct.getGiaNhap());
-            ps.setString(3, ct.getMaPNH());
-            ps.setString(4, ct.getMaSP());
+            ps.setDate(3, new java.sql.Date(ct.getHsd().getTime()));
+            ps.setString(4, ct.getSoLo());
+            ps.setString(5, ct.getMaPNH());
+            ps.setString(6, ct.getMaSP());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -199,7 +204,7 @@ public class PhieuNhapHangDAL {
     }
 
     public boolean themChiTietPhieuNhapHang(ChiTietPhieuNhapHangDTO ct, Connection conn) {
-        String sql = "INSERT INTO CHITIETPHIEUNHAPHANG (MAPNH, MASP, SLNHAP, GIANHAP) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO CHITIETPHIEUNHAPHANG (MAPNH, MASP, HSD, SOLO, SLNHAP, GIANHAP) VALUES (?, ?, ?, ?, ?, ?)";
         boolean shouldClose = conn == null;
 
         try {
@@ -208,8 +213,10 @@ public class PhieuNhapHangDAL {
 
             ps.setString(1, ct.getMaPNH());
             ps.setString(2, ct.getMaSP());
-            ps.setInt(3, ct.getSoLuongNhap());
-            ps.setDouble(4, ct.getGiaNhap());
+            ps.setDate(3, new java.sql.Date(ct.getHsd().getTime()));
+            ps.setString(4, ct.getSoLo());
+            ps.setInt(5, ct.getSoLuongNhap());
+            ps.setDouble(6, ct.getGiaNhap());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -248,15 +255,15 @@ public class PhieuNhapHangDAL {
             if (keyword.toUpperCase().startsWith("PNH")) {
                 sql.append(" AND MAPNH LIKE ?");
                 keyword = "%" + keyword + "%";
-            } else if (keyword.toUpperCase().startsWith("NCC")) {
+            } else if (keyword.toUpperCase().startsWith("NCU")) {
                 sql.append(" AND MANCU LIKE ?");
                 keyword = "%" + keyword + "%";
             } else if (keyword.toUpperCase().startsWith("NV")) {
-                sql.append(" AND MANHANVIEN LIKE ?");
+                sql.append(" AND MANV LIKE ?");
                 keyword = "%" + keyword + "%";
             } else {
                 // Tìm kiếm trên tất cả các trường mã nếu không có prefix
-                sql.append(" AND (MAPNH LIKE ? OR MANCU LIKE ? OR MANHANVIEN LIKE ?)");
+                sql.append(" AND (MAPNH LIKE ? OR MANCU LIKE ? OR MANV LIKE ?)");
                 keyword = "%" + keyword + "%";
             }
         }
@@ -289,7 +296,7 @@ public class PhieuNhapHangDAL {
             // Xử lý tham số keyword
             if (keyword != null && !keyword.isEmpty()) {
                 if (keyword.toUpperCase().startsWith("%PNH") ||
-                        keyword.toUpperCase().startsWith("%NCC") ||
+                        keyword.toUpperCase().startsWith("%NCU") ||
                         keyword.toUpperCase().startsWith("%NV")) {
                     ps.setString(paramIndex++, keyword);
                 } else {
@@ -322,7 +329,7 @@ public class PhieuNhapHangDAL {
                     PhieuNhapHangDTO pnh = new PhieuNhapHangDTO(
                             rs.getString("MAPNH"),
                             rs.getString("MANCU"),
-                            rs.getString("MANHANVIEN"),
+                            rs.getString("MANV"),
                             rs.getDate("NGAYLAPPHIEU"),
                             rs.getDouble("THANHTIEN")
                     );

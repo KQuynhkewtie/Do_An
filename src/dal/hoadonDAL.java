@@ -2,6 +2,8 @@ package dal;
 
 import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
+
+import javax.swing.*;
 import java.sql.*;
 import java.util.*;
 
@@ -34,9 +36,9 @@ public class hoadonDAL {
 
             while (rs.next()) {
                 HoaDonDTO hd = new HoaDonDTO(
-                        rs.getString("MAHOADON"),
-                        rs.getString("MANHANVIEN"),
-                        rs.getString("MAKH"),
+                        rs.getString("MAHD").trim(),
+                        rs.getString("MANV").trim(),
+                        rs.getString("MAKH") != null ? rs.getString("MAKH").trim() : null,
                         rs.getDate("NGAYBAN"),
                         rs.getDouble("THANHTIEN"),
                         rs.getString("TRANGTHAI")
@@ -53,14 +55,14 @@ public class hoadonDAL {
 
     // Thêm hóa đơn mới
     public boolean themHoaDon(HoaDonDTO hd) {
-        String sql = "INSERT INTO HOADON (MAHOADON, MANHANVIEN, MAKH, NGAYBAN, THANHTIEN) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO HOADON (MAHD, MANV, MAKH, NGAYBAN, THANHTIEN, TRANGTHAI) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, hd.getMaHoaDon());
-            pst.setString(2, hd.getMaNhanVien());
-            pst.setString(3, hd.getMaKH());
+            pst.setString(1, hd.getMaHoaDon().trim());
+            pst.setString(2, hd.getMaNhanVien().trim());
+            pst.setString(3, hd.getMaKH() != null ? hd.getMaKH().trim() : null);
             pst.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
             pst.setDouble(5, hd.getThanhTien());
             pst.setString(6, hd.getTrangThai());
@@ -83,17 +85,17 @@ public class hoadonDAL {
         // Thêm điều kiện tìm kiếm theo mã (tự động nhận diện loại mã)
         if (keyword != null && !keyword.isEmpty()) {
             if (keyword.toUpperCase().startsWith("HD")) {
-                sql.append(" AND MAHOADON LIKE ?");
+                sql.append(" AND MAHD LIKE ?");
                 keyword = "%" + keyword + "%";
             } else if (keyword.toUpperCase().startsWith("NV")) {
-                sql.append(" AND MANHANVIEN LIKE ?");
+                sql.append(" AND MANV LIKE ?");
                 keyword = "%" + keyword + "%";
             } else if (keyword.toUpperCase().startsWith("KH")) {
                 sql.append(" AND MAKH LIKE ?");
                 keyword = "%" + keyword + "%";
             } else {
                 // Tìm kiếm trên tất cả các trường mã nếu không có prefix
-                sql.append(" AND (MAHOADON LIKE ? OR MANHANVIEN LIKE ? OR MAKH LIKE ?)");
+                sql.append(" AND (MAHD LIKE ? OR MANV LIKE ? OR MAKH LIKE ?)");
                 keyword = "%" + keyword + "%";
             }
         }
@@ -169,8 +171,8 @@ public class hoadonDAL {
 
             while (rs.next()) {
                 HoaDonDTO hd = new HoaDonDTO(
-                        rs.getString("MAHOADON"),
-                        rs.getString("MANHANVIEN"),
+                        rs.getString("MAHD"),
+                        rs.getString("MANV"),
                         rs.getString("MAKH"),
                         rs.getDate("NGAYBAN"),
                         rs.getDouble("THANHTIEN"),
@@ -189,18 +191,18 @@ public class hoadonDAL {
     // Lấy chi tiết hóa đơn
     public List<ChiTietHoaDonDTO> layChiTietHoaDon(String maHoaDon) {
         List<ChiTietHoaDonDTO> danhSach = new ArrayList<>();
-        String sql = "SELECT * FROM CHITIETHOADON WHERE MAHOADON = ?";
+        String sql = "SELECT * FROM CHITIETHOADON WHERE MAHD = ?";
 
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maHoaDon);
+            pst.setString(1, maHoaDon.trim());
             rs = pst.executeQuery();
 
             while (rs.next()) {
                 ChiTietHoaDonDTO cthd = new ChiTietHoaDonDTO(
-                        rs.getString("MAHOADON"),
-                        rs.getString("MASP"),
+                        rs.getString("MAHD").trim(),
+                        rs.getString("MASP").trim(),
                         rs.getInt("SOLUONG"),
                         rs.getDouble("GIA")
                 );
@@ -214,7 +216,7 @@ public class hoadonDAL {
         return danhSach;
     }
 
-    // Các phương thức tính doanh thu (giữ nguyên từ code cũ)
+    // Các phương thức tính doanh thu
     public double getDoanhThuTheoNgay(java.util.Date ngay) {
         String sql = "SELECT SUM(THANHTIEN) AS doanhthu FROM HOADON WHERE TRUNC(NGAYBAN) = TRUNC(?) AND TRANGTHAI = 'BINH_THUONG'";
         try {
@@ -276,8 +278,8 @@ public class hoadonDAL {
 
     public boolean capNhatTongTienHoaDon(String maHoaDon) {
         String sql = "UPDATE HOADON hd SET THANHTIEN = " +
-                "(SELECT SUM(ct.SOLUONG * ct.GIA) FROM CHITIETHOADON ct WHERE ct.MAHOADON = hd.MAHOADON) " +
-                "WHERE hd.MAHOADON = ?";
+                "(SELECT SUM(ct.SOLUONG * ct.GIA) FROM CHITIETHOADON ct WHERE ct.MAHD = hd.MAHD) " +
+                "WHERE hd.MAHD = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -290,7 +292,7 @@ public class hoadonDAL {
     }
 
     public HoaDonDTO layHoaDonTheoMa(String maHoaDon) {
-        String sql = "SELECT * FROM HOADON WHERE MAHOADON = ?";
+        String sql = "SELECT * FROM HOADON WHERE MAHD = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
@@ -299,8 +301,8 @@ public class hoadonDAL {
 
             if (rs.next()) {
                 return new HoaDonDTO(
-                        rs.getString("MAHOADON"),
-                        rs.getString("MANHANVIEN"),
+                        rs.getString("MAHD"),
+                        rs.getString("MANV"),
                         rs.getString("MAKH"),
                         rs.getDate("NGAYBAN"),
                         rs.getDouble("THANHTIEN"),
@@ -316,7 +318,7 @@ public class hoadonDAL {
     }
 
     public boolean xoaHoaDon(String maHoaDon) {
-        String sql = "DELETE FROM HOADON WHERE MAHOADON = ?";
+        String sql = "DELETE FROM HOADON WHERE MAHD = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
@@ -331,7 +333,7 @@ public class hoadonDAL {
     }
 
     public boolean xoaTatCaChiTietHoaDon(String maHoaDon) {
-        String sql = "DELETE FROM CHITIETHOADON WHERE MAHOADON = ?";
+        String sql = "DELETE FROM CHITIETHOADON WHERE MAHD = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
@@ -397,11 +399,11 @@ public class hoadonDAL {
     }
 
     public boolean kiemTraMaHDTonTai(String maHD) {
-        String sql = "SELECT 1 FROM HOADON WHERE MAHOADON = ?";
+        String sql = "SELECT 1 FROM HOADON WHERE TRIM(MAHD) = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maHD);
+            pst.setString(1, maHD.trim());
             rs = pst.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -413,27 +415,27 @@ public class hoadonDAL {
     }
 
     public boolean kiemTraNhanVienTonTai(String maNV) {
-        String sql = "SELECT 1 FROM NHANVIEN WHERE MANHANVIEN = ?";
-        try {
-            conn = DatabaseHelper.getConnection();
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, maNV);
-            rs = pst.executeQuery();
-            return rs.next();
+        String sql = "SELECT 1 FROM NHANVIEN WHERE TRIM(MANV) = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            pst.setString(1, maNV.trim());
+
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        } finally {
-            closeResources();
         }
     }
 
     public boolean kiemTraKhachHangTonTai(String maKH) {
-        String sql = "SELECT 1 FROM KHACHHANG WHERE MAKH = ?";
+        String sql = "SELECT 1 FROM KHACHHANG WHERE TRIM(MAKH) = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maKH);
+            pst.setString(1, maKH.trim());
             rs = pst.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -441,17 +443,6 @@ public class hoadonDAL {
             return false;
         } finally {
             closeResources();
-        }
-    }
-
-//    // Đóng kết nối
-    private void closeResources() {
-        try {
-            if (rs != null) rs.close();
-            if (pst != null) pst.close();
-            if (conn != null) conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -461,66 +452,54 @@ public class hoadonDAL {
             conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Thêm hóa đơn chính
-            String sqlHD = "INSERT INTO HOADON (MAHOADON, MANHANVIEN, MAKH, NGAYBAN, THANHTIEN, TRANGTHAI) VALUES (?, ?, ?, ?, ?, ?)";
-
-            try (PreparedStatement pstHD = conn.prepareStatement(sqlHD)) {
-                pstHD.setString(1, hd.getMaHoaDon());
-                pstHD.setString(2, hd.getMaNhanVien());
-                pstHD.setString(3, hd.getMaKH() == null || hd.getMaKH().isEmpty() ? null : hd.getMaKH());
-                pstHD.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
-                pstHD.setDouble(5, hd.getThanhTien());
-                pstHD.setString(6, hd.getTrangThai());
-
-
-                if (pstHD.executeUpdate() <= 0) {
-                    conn.rollback();
-                    return false;
+            // Kiểm tra trùng mã hóa đơn
+            String checkHDSql = "SELECT 1 FROM HOADON WHERE TRIM(MAHD) = ? FOR UPDATE NOWAIT";
+            try (PreparedStatement pst = conn.prepareStatement(checkHDSql)) {
+                pst.setString(1, hd.getMaHoaDon().trim());
+                if (pst.executeQuery().next()) {
+                    throw new SQLException("Mã hóa đơn đã tồn tại");
                 }
             }
 
-            // 2. Thêm chi tiết hóa đơn
-            String sqlCT = "INSERT INTO CHITIETHOADON (MAHOADON, MASP, SOLUONG, GIA) VALUES (?, ?, ?, ?)";
+            // Thêm hóa đơn chính
+            String sqlHD = "INSERT INTO HOADON (MAHD, MANV, MAKH, NGAYBAN, THANHTIEN, TRANGTHAI) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement pstHD = conn.prepareStatement(sqlHD)) {
+                pstHD.setString(1, hd.getMaHoaDon().trim());
+                pstHD.setString(2, hd.getMaNhanVien().trim());
+                pstHD.setString(3, hd.getMaKH() != null ? hd.getMaKH().trim() : null);
+                pstHD.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
+                pstHD.setDouble(5, hd.getThanhTien());
+                pstHD.setString(6, hd.getTrangThai());
+                pstHD.executeUpdate();
+            }
 
+            // Thêm chi tiết hóa đơn
+            String sqlCT = "INSERT INTO CHITIETHOADON (MAHD, MASP, SOLUONG, GIA) VALUES (?, ?, ?, ?)";
             try (PreparedStatement pstCT = conn.prepareStatement(sqlCT)) {
-                for (ChiTietHoaDonDTO cthd : danhSachChiTiet) {
-
-                    // Trừ số lượng tồn kho trước
-                    if (!giamSoLuongSanPham(cthd.getMaSanPham(), cthd.getSoLuong(), conn)) {
-                        conn.rollback();
-                        return false;
+                for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
+                    if (!giamSoLuongSanPham(ct.getMaSanPham().trim(), ct.getSoLuong(), conn)) {
+                        throw new SQLException("Không thể cập nhật tồn kho cho " + ct.getMaSanPham());
                     }
 
-                    pstCT.setString(1, cthd.getMaHoaDon());
-                    pstCT.setString(2, cthd.getMaSanPham());
-                    pstCT.setInt(3, cthd.getSoLuong());
-                    pstCT.setDouble(4, cthd.getGia());
+                    pstCT.setString(1, ct.getMaHoaDon().trim());
+                    pstCT.setString(2, ct.getMaSanPham().trim());
+                    pstCT.setInt(3, ct.getSoLuong());
+                    pstCT.setDouble(4, ct.getGia());
                     pstCT.addBatch();
                 }
-
-                int[] results = pstCT.executeBatch();
-
-                for (int i = 0; i < results.length; i++) {
-                    if (results[i] == Statement.EXECUTE_FAILED) {
-                        conn.rollback();
-                        return false;
-                    }
-                }
+                pstCT.executeBatch();
             }
 
             conn.commit();
             return true;
         } catch (SQLException e) {
-            System.err.println("SQLException trong DAL: " + e.getMessage());
             try {
-                if (conn != null) {
-                    conn.rollback();
-                    System.err.println("Đã rollback transaction");
-                }
+                if (conn != null) conn.rollback();
             } catch (SQLException ex) {
                 System.err.println("Lỗi khi rollback: " + ex.getMessage());
             }
-            e.printStackTrace();
+
+            JOptionPane.showMessageDialog(null, "Lỗi: " + e.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
             return false;
         } finally {
             try {
@@ -529,7 +508,7 @@ public class hoadonDAL {
                     conn.close();
                 }
             } catch (SQLException e) {
-                System.err.println("Lỗi khi đóng kết nối: " + e.getMessage());
+                System.err.println("Lỗi đóng kết nối: " + e.getMessage());
             }
         }
     }
@@ -545,7 +524,7 @@ public class hoadonDAL {
             connection.setAutoCommit(false); // Start transaction
 
             // 1. Update main bill information
-            String sqlHoaDon = "UPDATE HOADON SET MaNhanVien = ?, MaKH = ?, NgayBan = ?, ThanhTien = ? WHERE MaHoaDon = ?";
+            String sqlHoaDon = "UPDATE HOADON SET MANV = ?, MAKH = ?, NgayBan = ?, ThanhTien = ? WHERE MAHD = ?";
             pstHoaDon = connection.prepareStatement(sqlHoaDon);
             pstHoaDon.setString(1, hd.getMaNhanVien());
             pstHoaDon.setString(2, hd.getMaKH());
@@ -560,13 +539,13 @@ public class hoadonDAL {
             }
 
             // 2. Delete all existing details
-            String sqlDeleteChiTiet = "DELETE FROM CHITIETHOADON WHERE MaHoaDon = ?";
+            String sqlDeleteChiTiet = "DELETE FROM CHITIETHOADON WHERE MAHD = ?";
             pstDeleteChiTiet = connection.prepareStatement(sqlDeleteChiTiet);
             pstDeleteChiTiet.setString(1, hd.getMaHoaDon());
             pstDeleteChiTiet.executeUpdate();
 
             // 3. Insert new details
-            String sqlInsertChiTiet = "INSERT INTO CHITIETHOADON (MaHoaDon, MaSP, SoLuong, Gia) VALUES (?, ?, ?, ?)";
+            String sqlInsertChiTiet = "INSERT INTO CHITIETHOADON (MAHD, MaSP, SoLuong, Gia) VALUES (?, ?, ?, ?)";
             pstInsertChiTiet = connection.prepareStatement(sqlInsertChiTiet);
 
             for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
@@ -610,11 +589,25 @@ public class hoadonDAL {
 
     // Thêm vào hoadonDAL.java
     private boolean giamSoLuongSanPham(String maSP, int soLuong, Connection conn) throws SQLException {
-        String sql = "UPDATE SANPHAM SET HANGTON = HANGTON - ? WHERE MASP = ? AND HANGTON >= ?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        String checkSql = "SELECT SOLUONG FROM SANPHAM WHERE TRIM(MASP) = ? FOR UPDATE";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            checkStmt.setString(1, maSP.trim());
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (!rs.next()) {
+                throw new SQLException("Sản phẩm " + maSP + " không tồn tại");
+            }
+
+            int soLuongTon = rs.getInt("SOLUONG");
+            if (soLuongTon < soLuong) {
+                throw new SQLException("Không đủ tồn kho cho " + maSP);
+            }
+        }
+
+        String updateSql = "UPDATE SANPHAM SET SOLUONG = SOLUONG - ? WHERE TRIM(MASP) = ?";
+        try (PreparedStatement pst = conn.prepareStatement(updateSql)) {
             pst.setInt(1, soLuong);
-            pst.setString(2, maSP);
-            pst.setInt(3, soLuong); // Đảm bảo số lượng tồn đủ để trừ
+            pst.setString(2, maSP.trim());
             return pst.executeUpdate() > 0;
         }
     }
@@ -630,7 +623,7 @@ public class hoadonDAL {
 
             // 2. Phục hồi số lượng tồn kho
             for (ChiTietHoaDonDTO ct : chiTiet) {
-                String sql = "UPDATE SANPHAM SET HANGTON = HANGTON + ? WHERE MASP = ?";
+                String sql = "UPDATE SANPHAM SET SOLUONG = SOLUONG + ? WHERE MASP = ?";
                 try (PreparedStatement pst = conn.prepareStatement(sql)) {
                     pst.setInt(1, ct.getSoLuong());
                     pst.setString(2, ct.getMaSanPham());
@@ -639,7 +632,7 @@ public class hoadonDAL {
             }
 
             // 3. Cập nhật trạng thái hóa đơn
-            String sqlUpdate = "UPDATE HOADON SET TRANGTHAI = 'DA_HUY' WHERE MAHOADON = ?";
+            String sqlUpdate = "UPDATE HOADON SET TRANGTHAI = 'DA_HUY' WHERE MAHD = ?";
             try (PreparedStatement pst = conn.prepareStatement(sqlUpdate)) {
                 pst.setString(1, maHoaDon);
                 pst.executeUpdate();
@@ -653,6 +646,17 @@ public class hoadonDAL {
             return false;
         } finally {
             if (conn != null) try { conn.close(); } catch (SQLException e) {}
+        }
+    }
+
+    //    // Đóng kết nối
+    private void closeResources() {
+        try {
+            if (rs != null) rs.close();
+            if (pst != null) pst.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

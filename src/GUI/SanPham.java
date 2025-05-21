@@ -5,6 +5,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import dto.SanPhamDTO;
@@ -18,27 +19,27 @@ public class SanPham extends BaseFrame {
     private JTextField searchproductField;
 
     public SanPham() {
-    	super("Sản phẩm");
-    	initialize();
-    	} 
-    	
-    	 @Override
-    	protected void initUniqueComponents() {
-    		 for (JButton btn : menuButtons) {
-    	            if (btn.getText().equals("Sản phẩm")) {
-    	                btn.setBackground(Color.decode("#EF5D7A")); 
-    	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-    	            }
-    	        }
-    	        
-    	        // Các nút khác vẫn giữ màu mặc định
-    	        for (JButton btn : menuButtons) {
-    	            if (!btn.getText().equals("Sản phẩm")) {
-    	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-    	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-    	            }
-    	        }
-        
+        super("Sản phẩm");
+        initialize();
+    }
+
+    @Override
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+        // Các nút khác vẫn giữ màu mặc định
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
+
         JLabel lblSanPham = new JLabel("Sản phẩm", SwingConstants.LEFT);
         lblSanPham.setFont(new Font("Arial", Font.BOLD, 20));
         lblSanPham.setBounds(270, 60, 200, 30);
@@ -47,7 +48,7 @@ public class SanPham extends BaseFrame {
         searchproductField = new JTextField("Tìm kiếm sản phẩm");
         searchproductField.setBounds(270, 110, 300, 35);
         add(searchproductField);
-        
+
         searchproductField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -71,20 +72,20 @@ public class SanPham extends BaseFrame {
             public void keyReleased(KeyEvent e) {
                 String keyword = searchproductField.getText().trim();
                 if (keyword.isEmpty()) {
-                    loadSanPham(); 
+                    loadSanPham();
                 } else {
                     searchSanPham();
                 }
             }
         });
-        
+
 
         JButton btnThemSP = new JButton("+ Thêm sản phẩm");
         btnThemSP.setBounds(900, 110, 140, 30);
         btnThemSP.setBackground(Color.decode("#F0483E"));
         btnThemSP.setForeground(Color.WHITE);
         add(btnThemSP);
-        
+
         // Table
         String[] columnNames = {"Tên sản phẩm", "Mã sản phẩm", "Loại sản phẩm", "Số lượng", "Hạn sử dụng"};
         model = new DefaultTableModel(columnNames, 0);
@@ -93,11 +94,11 @@ public class SanPham extends BaseFrame {
         scrollPane.setBounds(270, 180, 720, 400);
         add(scrollPane);
 
+        addExceltButton(table);
 
-        
         // Hiển thị danh sách sản phẩm từ database
-        loadSanPham();        
-        
+        loadSanPham();
+
         btnThemSP.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,7 +106,7 @@ public class SanPham extends BaseFrame {
                 new Themsp(); // Mở giao diện Thêm sản phẩm
             }
         });
-        
+
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -117,7 +118,8 @@ public class SanPham extends BaseFrame {
                         if (sp != null) {
                             dispose();
                             TTCTsp ctsp = new TTCTsp();
-                            ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getHangTon(), sp.getMaHSX(), sp.getQuyCachDongGoi(), sp.getSoLo(), sp.getSoDangKy(), sp.getHsd().toString(), sp.getGiaBan());
+                            ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(), sp.getMaHSX(), sp.getQuyCachDongGoi(),sp.getSoDangKy(), sp.getGiaBan());
+
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy sản phẩm!");
                         }
@@ -126,14 +128,12 @@ public class SanPham extends BaseFrame {
             }
         });
 
-        
+
         setVisible(true);
 
-        addExceltButton();
-    
     }
-    
-   
+
+
 
     private void loadSanPham() {
         model.setRowCount(0); // Xóa tất cả các dòng trong bảng
@@ -141,13 +141,13 @@ public class SanPham extends BaseFrame {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
         for (SanPhamDTO sp : list) {
-            String hsdStr = (sp.getHsd() != null) ? sdf.format(sp.getHsd()) : "N/A";
-            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getHangTon(), hsdStr});
+
+            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(),});
         }
     }
 
     private void searchSanPham() {
-    	String keyword = searchproductField.getText().trim();// Lấy từ khóa tìm kiếm từ ô nhập liệu
+        String keyword = searchproductField.getText().trim();// Lấy từ khóa tìm kiếm từ ô nhập liệu
         if (keyword.equals("Tìm") || keyword.isEmpty()) {
             loadSanPham();
             return;
@@ -158,18 +158,14 @@ public class SanPham extends BaseFrame {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
         for (SanPhamDTO sp : list) {
-            String hsdStr = (sp.getHsd() != null) ? sdf.format(sp.getHsd()) : "N/A";
-            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getHangTon(), hsdStr});
+
+            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong()});
         }
     }
 
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
 
     public static void main(String[] args) {
         new SanPham().setVisible(true);;
-   }
+    }
 }
 

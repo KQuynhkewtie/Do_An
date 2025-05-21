@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 public class Capnhatttkh extends BaseFrame {
 	private KhachHangBLL bllKhachhang = new KhachHangBLL();
 	private khachhangdal khDAL= new khachhangdal();
-	private JTextField  txtHoTen, txtMaKH, txtDiemTL, txtSoLanMua, txtMaLoaiKH;
+	private JTextField  txtHoTen, txtMaKH, txtDiemTL, txtMaLoaiKH, txtSDT;
     public Capnhatttkh() {
     	super("Cập nhật thông tin khách hàng");
     	initialize();
@@ -92,9 +92,9 @@ public class Capnhatttkh extends BaseFrame {
         JLabel lblSoLanMua = new JLabel("Số lần mua:");
         lblSoLanMua.setBounds(270, 220, 150, 30);
         add(lblSoLanMua);
-        txtSoLanMua = new JTextField();
-        txtSoLanMua.setBounds(450, 220, 200, 30);
-        add(txtSoLanMua);
+        txtSDT = new JTextField();
+        txtSDT.setBounds(450, 220, 200, 30);
+        add(txtSDT);
         // điểm tích lũy
         JLabel lblDiemTL = new JLabel("Điểm tích lũy:");
         lblDiemTL.setBounds(270, 270, 150, 30);
@@ -124,11 +124,10 @@ public class Capnhatttkh extends BaseFrame {
                 String maKH = txtMaKH.getText().trim();
                 String tenKH = txtHoTen.getText().trim();
                 String DTLstr = txtDiemTL.getText().trim();
-                String SLMstr = txtSoLanMua.getText().trim();
                 String maloaikh = txtMaLoaiKH.getText().trim();
+                String SDTstr = txtSDT.getText().trim();
                 
                 try {
-                    int SLM = Integer.parseInt(SLMstr);
                     double DTL = Double.parseDouble(DTLstr);
                    
 
@@ -137,8 +136,8 @@ public class Capnhatttkh extends BaseFrame {
                     kh.setMaKH(maKH);
                     kh.setHoTen(tenKH);
                     kh.setDiemTichLuy(DTL);
-                    kh.setSoLanMua(SLM);
                     kh.setLoaiKhach(maloaikh);
+                    kh.setSDT();
                  
                     System.out.println("MAKH cần cập nhật: " + maKH);
                     
@@ -149,7 +148,7 @@ public class Capnhatttkh extends BaseFrame {
                         JOptionPane.showMessageDialog(null, "Cập nhật khách hàng thành công!");
                         dispose(); // đóng form nếu muốn
                         TTCTkh ctkh = new TTCTkh();
-                        ctkh.setThongTin(kh.getHoTen(), kh.getMaKH(), kh.getSoLanMua(), kh.getDiemTichLuy(), kh.getLoaiKhach());
+                        ctkh.setThongTin(kh.getHoTen(), kh.getMaKH(), kh.getDiemTichLuy(), kh.getLoaiKhach(), kh.getSDT());
                     } else {
                         JOptionPane.showMessageDialog(null, "Cập nhật thất bại!");
                     }
@@ -170,10 +169,10 @@ public class Capnhatttkh extends BaseFrame {
             // Điền thông tin vào các trường nhập liệu trong trang cập nhật thông tin sản phẩm
             txtHoTen.setText(kh.getHoTen());
             txtMaKH.setText(kh.getMaKH());
-            txtSoLanMua.setText(String.valueOf(kh.getSoLanMua()));
             txtDiemTL.setText(String.valueOf(kh.getDiemTichLuy()));
             txtMaLoaiKH.setText(String.valueOf(kh.getLoaiKhach()));
-           
+            txtSDT.setText(String.valueOf(kh.getSDT()));
+
         } else {
             JOptionPane.showMessageDialog(this, "Không tìm thấy khách hàng!");
         }

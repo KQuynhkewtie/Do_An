@@ -17,39 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class PDFGenerator {
-    private HoaDonBLL hdBLL = new HoaDonBLL();
-
-//    public void exportHoaDonToPDF(JFrame parentFrame, String maHoaDon) {
-//        if (maHoaDon == null || maHoaDon.trim().isEmpty()) {
-//            JOptionPane.showMessageDialog(parentFrame, "Không có hóa đơn để xuất!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
-//
-//        JFileChooser fileChooser = new JFileChooser();
-//        fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
-//        fileChooser.setSelectedFile(new File("HoaDon_" + maHoaDon + ".pdf"));
-//
-//        int userSelection = fileChooser.showSaveDialog(parentFrame);
-//
-//        if (userSelection == JFileChooser.APPROVE_OPTION) {
-//            File fileToSave = fileChooser.getSelectedFile();
-//            String filePath = fileToSave.getAbsolutePath();
-//            if (!filePath.toLowerCase().endsWith(".pdf")) {
-//                filePath += ".pdf";
-//            }
-//
-//            try {
-//                generatePDF(filePath, maHoaDon);
-//                JOptionPane.showMessageDialog(parentFrame,
-//                        "Xuất PDF thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-//            } catch (Exception ex) {
-//                JOptionPane.showMessageDialog(parentFrame,
-//                        "Lỗi khi xuất PDF: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-//                ex.printStackTrace();
-//            }
-//        }
-//    }
-
     public void exportHoaDonToPDF(JFrame parentFrame,
                                   HoaDonDTO hd,
                                   List<ChiTietHoaDonDTO> chiTiet,

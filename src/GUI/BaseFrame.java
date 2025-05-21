@@ -3,6 +3,7 @@ package GUI;
 import javax.swing.*;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -197,7 +198,7 @@ public abstract class BaseFrame extends JFrame {
     }
 
 
-    protected void addExceltButton() {
+    protected void addExceltButton(JTable table) {
         ImageIcon iconExcel = new ImageIcon(getClass().getClassLoader().getResource("image/excel-icon.png"));
         Image imgExcel = iconExcel.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Scale ảnh
         ImageIcon resizedIconExcel = new ImageIcon(imgExcel);
@@ -219,9 +220,20 @@ public abstract class BaseFrame extends JFrame {
 
         // Gắn sự kiện cho button
         btnExportExcel.addActionListener(e -> {
-            // Logic xử lý khi button được nhấn
-            System.out.println("Xuất Excel");
-            // Bạn có thể thay thế bằng logic xuất Excel của bạn ở đây
+            try {
+                if (table != null && table.getRowCount() > 0) {
+                    boolean success = helper.JTableExporter.exportJTableToExcel(table);
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Xuất Excel thành công!");
+                    }
+
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không có dữ liệu để xuất!");
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi xuất Excel: " + ex.getMessage());
+            }
+
         });
 
         add(btnExportExcel);

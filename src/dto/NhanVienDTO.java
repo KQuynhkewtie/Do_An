@@ -76,7 +76,7 @@ public class NhanVienDTO {
                 ", hoTen='" + hoTen + '\'' +
                 ", cccd='" + cccd + '\'' +
                 ", sdt='" + sdt + '\'' +
-                ", viTriCongViec='" + viTriCongViec + '\'' +
+                ", MAVT='" + viTriCongViec + '\'' +
                 ", maSoThue='" + maSoThue + '\'' +
                 '}';
     }

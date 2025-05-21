@@ -107,11 +107,16 @@ public class HoaDonBLL {
     // Thêm các phương thức mới
     public boolean themHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
         try {
+            System.out.println("Bắt đầu thêm hóa đơn " + hd.getMaHoaDon());
             // Bắt đầu transaction
             connection.setAutoCommit(false);
 
             // Kiểm tra số lượng tồn kho
+            System.out.println("Kiểm tra tồn kho...");
+
             if (!kiemTraSoLuongTonKho(danhSachChiTiet)) {
+                System.out.println("Lỗi: Không đủ tồn kho");
+
                 JOptionPane.showMessageDialog(null, "Một số sản phẩm không đủ số lượng tồn kho!");
                 connection.rollback();
                 return false;
@@ -121,20 +126,38 @@ public class HoaDonBLL {
             double tongTien = danhSachChiTiet.stream()
                     .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
                     .sum();
+            System.out.println("Tổng tiền: " + tongTien);
             hd.setThanhTien(tongTien);
 
             // Thêm hóa đơn và chi tiết
+            System.out.println("Thêm hóa đơn vào DAL...");
+
             boolean result = hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
 
             if (result) {
+                System.out.println("Commit transaction...");
+
                 connection.commit();
                 return true;
             } else {
+                System.out.println("Rollback do thêm hóa đơn thất bại");
+
                 connection.rollback();
                 return false;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            String errorMsg = "Lỗi database: ";
+            if (e.getErrorCode() == 547) { // Lỗi khóa ngoại
+                errorMsg += "Mã sản phẩm không tồn tại";
+            } else if (e.getErrorCode() == 515) { // Lỗi null
+                errorMsg += "Thiếu thông tin bắt buộc";
+            } else {
+                errorMsg += e.getMessage();
+            }
+
+            System.err.println(errorMsg);
+            JOptionPane.showMessageDialog(null, errorMsg, "Lỗi database", JOptionPane.ERROR_MESSAGE);
+
             try {
                 connection.rollback();
             } catch (SQLException ex) {
@@ -145,6 +168,8 @@ public class HoaDonBLL {
             try {
                 connection.setAutoCommit(true);
             } catch (SQLException e) {
+                System.err.println("Lỗi khi set auto commit: " + e.getMessage());
+
                 e.printStackTrace();
             }
         }
@@ -155,12 +180,19 @@ public class HoaDonBLL {
         try {
             for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
                 int tonKho = spDAL.getSoLuongTon(ct.getMaSanPham());
+                System.out.println("Sản phẩm " + ct.getMaSanPham() +
+                        " - Yêu cầu: " + ct.getSoLuong() +
+                        " - Tồn kho: " + tonKho);
                 if (tonKho < ct.getSoLuong()) {
+                    System.out.println("Không đủ tồn kho cho sản phẩm " + ct.getMaSanPham());
+
                     return false;
                 }
             }
             return true;
         } catch (Exception e) {
+            System.err.println("Lỗi khi kiểm tra tồn kho: " + e.getMessage());
+
             e.printStackTrace();
             return false;
         }

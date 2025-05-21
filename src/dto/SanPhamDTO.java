@@ -2,110 +2,97 @@ package dto;
 
 import java.util.Date;
 public class SanPhamDTO {
-		private String maSP;
-	    private String maHSX;
-	    private String maLSP;
-	    private String tenSP;
-	    private String quyCachDongGoi;
-	    private String soLo;
-	    private String soDangKy;
-	    private Date hsd;
-	    private int hangTon;
-	    private double giaBan;
+	private String maSP;
+	private String maHSX;
+	private String maLSP;
+	private String tenSP;
+	private String quyCachDongGoi;
+	private String soDangKy;
+	private int soLuong;
+	private double giaBan;
 
-	    // Constructor
-	    public SanPhamDTO() {}
+	// Constructor
+	public SanPhamDTO() {
+	}
 
-	    public SanPhamDTO(String maSP, String maHSX, String maLSP, String tenSP, String quyCachDongGoi,
-						  String soLo, String soDangKy, Date hsd, int hangTon, double giaBan) {
-	        this.maSP = maSP;
-	        this.maHSX = maHSX;
-	        this.maLSP = maLSP;
-	        this.tenSP = tenSP;
-	        this.quyCachDongGoi = quyCachDongGoi;
-	        this.soLo = soLo;
-	        this.soDangKy = soDangKy;
-	        this.hsd = hsd;
-	        this.hangTon = hangTon;
-	        this.giaBan = giaBan;
-	    }
+	public SanPhamDTO(String maSP, String maHSX, String maLSP, String tenSP, String quyCachDongGoi,
+					  String soDangKy, int soLuong, double giaBan) {
+		this.maSP = maSP;
+		this.maHSX = maHSX;
+		this.maLSP = maLSP;
+		this.tenSP = tenSP;
+		this.quyCachDongGoi = quyCachDongGoi;
+		this.soDangKy = soDangKy;
+		this.soLuong = soLuong;
+		this.giaBan = giaBan;
+	}
 
-	    // Getter & Setter
-	    public String getMaSP() {
-	    	return maSP; 
-	    }
-	    public void setMaSP(String maSP) { 
-	    	this.maSP = maSP; 
-	    }
+	// Getter & Setter
+	public String getMaSP() {
+		return maSP;
+	}
 
-	    public String getMaHSX() { 
-	    	return maHSX;
-	    }
-	    public void setMaHSX(String maHSX) { 
-	    	this.maHSX = maHSX; 
-	    }
+	public void setMaSP(String maSP) {
+		this.maSP = maSP;
+	}
 
-	    public String getMaLSP() {
-	    	return maLSP; 
-	    }
-	    public void setMaLSP(String maLSP) { 
-	    	this.maLSP = maLSP; 
-	    }
+	public String getMaHSX() {
+		return maHSX;
+	}
 
-	    public String getTenSP() {
-	    	return tenSP; 
-	    }
-	    public void setTenSP(String tenSP) { 
-	    	this.tenSP = tenSP; 
-	    }
+	public void setMaHSX(String maHSX) {
+		this.maHSX = maHSX;
+	}
 
-	    public String getQuyCachDongGoi() { 
-	    	return quyCachDongGoi; 
-	    }
-	    public void setQuyCachDongGoi(String quyCachDongGoi) { 
-	    	this.quyCachDongGoi = quyCachDongGoi;
-	    }
+	public String getMaLSP() {
+		return maLSP;
+	}
 
-	    public String getSoLo() {
-	    	return soLo; 
-	    }
-	    public void setSoLo(String soLo) { 
-	    	this.soLo = soLo; 
-	    }
+	public void setMaLSP(String maLSP) {
+		this.maLSP = maLSP;
+	}
 
-	    public String getSoDangKy() { 
-	    	return soDangKy;
-	    }
-	    public void setSoDangKy(String soDangKy) { 
-	    	this.soDangKy = soDangKy; 
-	    }
+	public String getTenSP() {
+		return tenSP;
+	}
 
-	    public Date getHsd() { 
-	    	return hsd; 
-	    }
-	    public void setHsd(Date hsd) {
-	    	this.hsd = hsd; 
-	    }
+	public void setTenSP(String tenSP) {
+		this.tenSP = tenSP;
+	}
 
-	    public int getHangTon() { 
-	    	return hangTon; 
-	    }
-	    public void setHangTon(int hangTon) { 
-	    	this.hangTon = hangTon; 
-	    }
+	public String getQuyCachDongGoi() {
+		return quyCachDongGoi;
+	}
 
-	    public double getGiaBan() { 
-	    	return giaBan; 
-	    }
-	    public void setGiaBan(double giaBan) {
-	    	this.giaBan = giaBan; 
-	    }
-	    
-	    
-	    @Override
-	    public String toString() {
-	        return "Mã SP: " + maSP + " | Tên SP: " + tenSP + " | Giá: " + giaBan + " | HSD: " + hsd;
-	    }
+	public void setQuyCachDongGoi(String quyCachDongGoi) {
+		this.quyCachDongGoi = quyCachDongGoi;
+	}
+
+
+	public String getSoDangKy() {
+		return soDangKy;
+	}
+
+	public void setSoDangKy(String soDangKy) {
+		this.soDangKy = soDangKy;
+	}
+
+	public int getsoluong() {
+		return soLuong;
+	}
+
+	public void setsoluong(int soLuong) {
+		this.soLuong = soLuong;
+	}
+
+	public double getGiaBan() {
+		return giaBan;
+	}
+
+	public void setGiaBan(double giaBan) {
+		this.giaBan = giaBan;
+	}
+
 }
 
    

@@ -129,7 +129,7 @@ public class Nhacungung extends BaseFrame {
         });
         setVisible(true);
 
-        addExceltButton();
+        //addExceltButton();
     }
     private void loadNCU() {
         model.setRowCount(0); // Xóa tất cả các dòng trong bảng
@@ -156,10 +156,10 @@ public class Nhacungung extends BaseFrame {
         System.out.println("Số ncu tìm thấy: " + list.size());
     }
 
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         new Nhacungung();

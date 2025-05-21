@@ -460,7 +460,8 @@ public class ThemHD extends BaseFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int selectedRow = table.getSelectedRow();
-                txtMaNV.setText(model.getValueAt(selectedRow, 0).toString());
+                String maNVSelected = model.getValueAt(selectedRow, 0).toString().trim(); // Thêm trim() ở đây
+                txtMaNV.setText(maNVSelected);
                 dialog.dispose();
             }
         });
@@ -489,7 +490,7 @@ public class ThemHD extends BaseFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int selectedRow = table.getSelectedRow();
-                txtMaKH.setText(model.getValueAt(selectedRow, 0).toString());
+                txtMaKH.setText(model.getValueAt(selectedRow, 0).toString().trim());
                 dialog.dispose();
             }
         });
@@ -503,6 +504,7 @@ public class ThemHD extends BaseFrame {
         String maKH = txtMaKH.getText().trim();
         String maNV = txtMaNV.getText().trim();
         Date ngayLap = dateChooserNgay.getDate();
+
 
         if (maHD.isEmpty() || maNV.isEmpty() || ngayLap == null) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);

@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class JTableExporter {
 
-    public static void exportJTableToExcel(JTable table) throws IOException {
+    public static boolean exportJTableToExcel(JTable table) throws IOException {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Chọn đường dẫn lưu file Excel");
         FileNameExtensionFilter filter = new FileNameExtensionFilter("XLSX files", "xlsx");
@@ -19,6 +19,10 @@ public class JTableExporter {
         fileChooser.setAcceptAllFileFilterUsed(false);
 
         int userChoice = fileChooser.showSaveDialog(null);
+        if (userChoice != JFileChooser.APPROVE_OPTION) {
+            return false;
+        }
+
         if (userChoice == JFileChooser.APPROVE_OPTION) {
             String filePath = fileChooser.getSelectedFile().getAbsolutePath();
             if (!filePath.toLowerCase().endsWith(".xlsx")) {
@@ -59,7 +63,9 @@ public class JTableExporter {
             }
 
             workbook.close();
+
         }
+        return true;
     }
 }
 

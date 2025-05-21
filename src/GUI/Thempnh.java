@@ -5,6 +5,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -129,36 +131,69 @@ public class Thempnh extends BaseFrame {
         lblChiTiet.setBounds(270, 280, 200, 30);
         add(lblChiTiet);
 
-        String[] columns = {"Mã sản phẩm", "Tên sản phẩm", "Số lượng nhập", "Giá nhập"};
+        String[] columns = {"Mã sản phẩm", "Tên sản phẩm", "Số lượng nhập", "Giá nhập", "Hạn sử dụng", "Số lô"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                // Chỉ cho phép chỉnh sửa cột số lượng và giá nhập
-                return column == 2 || column == 3;
+                return column >= 2 && column <= 5;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 4) return Date.class;
+                return Object.class;
             }
         };
+
         table = new JTable(tableModel);
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-        table.setRowHeight(30);//Chat bảo thêm?
+        table.setRowHeight(30);
 
-        // Thiết lập renderer cho các cột
-        table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+        // Set up date picker for HSD column
+        table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JTextField()) {
+            private JDateChooser dateChooser = new JDateChooser();
+            private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setBackground(new Color(240, 240, 240)); // Màu nền xám nhạt
-                return c;
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                dateChooser.setDateFormatString("dd/MM/yyyy");
+                if (value instanceof Date) {
+                    dateChooser.setDate((Date) value);
+                } else if (value != null && !value.toString().isEmpty()) {
+                    try {
+                        dateChooser.setDate(dateFormat.parse(value.toString()));
+                    } catch (Exception e) {
+                        dateChooser.setDate(new Date());
+                    }
+                } else {
+                    dateChooser.setDate(new Date());
+                }
+                return dateChooser;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return dateChooser.getDate() != null ? dateFormat.format(dateChooser.getDate()) : "";
             }
         });
 
-        table.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+        // Set up renderers
+        DefaultTableCellRenderer nonEditableRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setBackground(new Color(240, 240, 240)); // Màu nền xám nhạt
+                if (column < 2) {
+                    c.setBackground(new Color(240, 240, 240));
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
                 return c;
             }
-        });
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(nonEditableRenderer);
+        }
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(270, 310, 500, 300); //Chat chỉnh chỗ này từ 500 --> 800
@@ -335,7 +370,7 @@ public class Thempnh extends BaseFrame {
                 String maSP = model.getValueAt(selectedRow, 0).toString();
                 String tenSP = model.getValueAt(selectedRow, 1).toString();
 
-                // Kiểm tra xem sản phẩm đã có trong bảng chưa
+                // Check if product already exists
                 for (int i = 0; i < tableModel.getRowCount(); i++) {
                     if (tableModel.getValueAt(i, 0).equals(maSP)) {
                         JOptionPane.showMessageDialog(dialog, "Sản phẩm này đã được thêm vào phiếu!",
@@ -344,20 +379,17 @@ public class Thempnh extends BaseFrame {
                     }
                 }
 
-                // Thêm dòng mới với sản phẩm đã chọn
-                tableModel.addRow(new Object[]{maSP, tenSP, "1", ""});
+                // Add new row with product info (including empty HSD and SoLo fields)
+                tableModel.addRow(new Object[]{maSP, tenSP, "1", "", "", ""});
                 dialog.dispose();
 
-                // Di chuyển focus đến ô số lượng của dòng mới
-                JTable mainTable = (JTable) ((JScrollPane) getContentPane().getComponent(6)).getViewport().getView();
+                // Focus on quantity field
+                JTable mainTable = this.table;
                 int newRow = tableModel.getRowCount() - 1;
                 mainTable.setRowSelectionInterval(newRow, newRow);
                 mainTable.setColumnSelectionInterval(2, 2);
                 mainTable.editCellAt(newRow, 2);
                 mainTable.getEditorComponent().requestFocusInWindow();
-            } else {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng chọn một sản phẩm!",
-                        "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -474,28 +506,43 @@ public class Thempnh extends BaseFrame {
 
         // Lấy danh sách chi tiết
         List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
         for (int i = 0; i < tableModel.getRowCount(); i++) {
-            String maSP = tableModel.getValueAt(i, 0).toString().trim();
-            String slStr = tableModel.getValueAt(i, 1).toString().trim();
-            String giaStr = tableModel.getValueAt(i, 3).toString().trim(); //Chat chỉnh từ 2 --> 3
-
-            if (maSP.isEmpty() || slStr.isEmpty() || giaStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin chi tiết!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
             try {
-                int soLuong = Integer.parseInt(slStr);
-                double giaNhap = Double.parseDouble(giaStr);
+                String maSP = tableModel.getValueAt(i, 0).toString().trim();
+                String slStr = tableModel.getValueAt(i, 2).toString().trim();
+                String giaStr = tableModel.getValueAt(i, 3).toString().trim();
+                String hsdStr = tableModel.getValueAt(i, 4).toString().trim();
+                String soLo = tableModel.getValueAt(i, 5).toString().trim();
 
-                if (soLuong <= 0 || giaNhap <= 0) {
-                    JOptionPane.showMessageDialog(this, "Số lượng và giá nhập phải lớn hơn 0!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                if (maSP.isEmpty() || slStr.isEmpty() || giaStr.isEmpty() || hsdStr.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Dòng " + (i+1) + ": Vui lòng nhập đầy đủ thông tin chi tiết!",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                danhSachChiTiet.add(new ChiTietPhieuNhapHangDTO(maPNH, maSP, soLuong, giaNhap));
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Số lượng và giá nhập phải là số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                int soLuong = Integer.parseInt(slStr);
+                double giaNhap = Double.parseDouble(giaStr);
+                Date hsd = dateFormat.parse(hsdStr);
+
+                if (soLuong <= 0 || giaNhap <= 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Dòng " + (i+1) + ": Số lượng và giá nhập phải lớn hơn 0!",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Create detail with all fields including HSD and SoLo
+                ChiTietPhieuNhapHangDTO ct = new ChiTietPhieuNhapHangDTO(
+                        maPNH, maSP, hsd, soLo, soLuong, giaNhap
+                );
+                danhSachChiTiet.add(ct);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        "Dòng " + (i+1) + ": Dữ liệu không hợp lệ! " + e.getMessage(),
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }

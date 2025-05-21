@@ -1,37 +1,39 @@
 package GUI;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import dal.SanPhamDAL;
 import dto.SanPhamDTO;
-
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
 public class Themsp extends BaseFrame {
-	private SanPhamDAL spDAL= new SanPhamDAL();
+    private SanPhamDAL spDAL= new SanPhamDAL();
     private JComboBox<String> comboMaLSP, comboHSX;
     public Themsp() {
-    	super("Cập nhật thông tin sản phẩm");
-    	initialize();
-    	} 
+        super("Cập nhật thông tin sản phẩm");
+        initialize();
+    }
     @Override
-   	protected void initUniqueComponents() {
-   		 for (JButton btn : menuButtons) {
-   	            if (btn.getText().equals("Sản phẩm")) {
-   	                btn.setBackground(Color.decode("#EF5D7A")); 
-   	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-   	            }
-   	        }
-   	        
-   	        // Các nút khác vẫn giữ màu mặc định
-   	        for (JButton btn : menuButtons) {
-   	            if (!btn.getText().equals("Sản phẩm")) {
-   	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-   	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-   	            }
-   	        }
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+        // Các nút khác vẫn giữ màu mặc định
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
         //Tiêu đề "Sản phẩm >> Thêm sản phẩm" có thể nhấn
         JLabel lblSanPhamLink = new JLabel("<html><u>Sản phẩm</u></html>");
         lblSanPhamLink.setFont(new Font("Arial", Font.BOLD, 20));
@@ -52,7 +54,7 @@ public class Themsp extends BaseFrame {
             }
         });
 
-      
+
 
         // Form nhập sản phẩm
         JLabel lblTenSP = new JLabel("Tên sản phẩm:");
@@ -68,17 +70,17 @@ public class Themsp extends BaseFrame {
         JTextField txtMaSP = new JTextField();
         txtMaSP.setBounds(700, 150, 300, 30);
         add(txtMaSP);
-        
+
         JLabel lblLoaiSP = new JLabel("Loại sản phẩm:");
         lblLoaiSP.setBounds(270, 200, 150, 25);
         add(lblLoaiSP);
 
         comboMaLSP = new JComboBox<>();
-        comboMaLSP.setBounds(270, 230, 300, 30); 
-        add(comboMaLSP);        
+        comboMaLSP.setBounds(270, 230, 300, 30);
+        add(comboMaLSP);
         loadLoaiSanPhamVaoComboBox();
 
-        
+
 
         JLabel lblSoLuong = new JLabel("Số lượng:");
         lblSoLuong.setBounds(700, 200, 150, 25);
@@ -94,7 +96,7 @@ public class Themsp extends BaseFrame {
         comboHSX.setBounds(270, 310, 300, 30);
         add(comboHSX);
         loadHSXVaoComboBox();
-        
+
         JLabel lblqcdg = new JLabel("Quy cách đóng gói:");
         lblqcdg.setBounds(700, 280, 150, 25);
         add(lblqcdg);
@@ -102,12 +104,7 @@ public class Themsp extends BaseFrame {
         txtQcdg.setBounds(700, 310, 300, 30);
         add(txtQcdg);
 
-        JLabel lblSolo = new JLabel("Số lô:");
-        lblSolo.setBounds(270, 360, 150, 25);
-        add(lblSolo);
-        JTextField txtSolo = new JTextField();
-        txtSolo.setBounds(270, 390, 300, 30);
-        add(txtSolo);
+
 
         JLabel lblSodk = new JLabel("Số đăng ký:");
         lblSodk.setBounds(700, 360, 150, 25);
@@ -116,12 +113,6 @@ public class Themsp extends BaseFrame {
         txtSodk.setBounds(700, 390, 300, 30);
         add(txtSodk);
 
-        JLabel lblHSD = new JLabel("Hạn sử dụng:");
-        lblHSD.setBounds(270, 440, 150, 25);
-        add(lblHSD);
-        JTextField txtHSD = new JTextField();
-        txtHSD.setBounds(270, 470, 300, 30);
-        add(txtHSD);
 
         JLabel lblGia = new JLabel("Giá bán:");
         lblGia.setBounds(700, 440, 150, 25);
@@ -146,11 +137,10 @@ public class Themsp extends BaseFrame {
                     String maLSP = comboMaLSP.getSelectedItem().toString().split(" - ")[0];
                     String maHSX = comboHSX.getSelectedItem().toString().split(" - ")[0];
                     double giaBan = Double.parseDouble(txtGia.getText().trim());
-                    
-                    String quyCachDongGoi = txtQcdg.getText().trim();  // Trường nhập quy cách đóng gói
-                    String soLo = txtSolo.getText().trim();  // Trường nhập số lô
+
+                    String quyCachDongGoi = txtQcdg.getText().trim();
                     String soDangKy = txtSodk.getText().trim();  // Trường nhập số đăng ký
-                    int hangTon = Integer.parseInt(txtSoLuong.getText().trim());  // Trường nhập số lượng tồn kho
+                    int soluong = Integer.parseInt(txtSoLuong.getText().trim());  // Trường nhập số lượng tồn kho
                     // Kiểm tra nếu chưa chọn mã loại SP hoặc mã HSX
                     if (maLSP.isEmpty() || maHSX.isEmpty()) {
                         JOptionPane.showMessageDialog(null, "Vui lòng chọn loại sản phẩm và hãng sản xuất!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -158,8 +148,8 @@ public class Themsp extends BaseFrame {
                     }
 
                     // Tạo đối tượng sản phẩm
-                    SanPhamDTO sp = new SanPhamDTO(maSP, maHSX, maLSP, tenSP, quyCachDongGoi, soLo, soDangKy, new Date(), hangTon, giaBan);
-                    
+                    SanPhamDTO sp = new SanPhamDTO(maSP, maHSX, maLSP, tenSP, quyCachDongGoi,  soDangKy, soluong, giaBan);
+
                     System.out.println("Mã loại sản phẩm lấy từ giao diện: [" + maLSP + "]");
 
                     // Gọi phương thức thêm sản phẩm vào DB
@@ -168,7 +158,8 @@ public class Themsp extends BaseFrame {
                     // Hiển thị thông báo
                     if (result) {
                         JOptionPane.showMessageDialog(null, "Thêm sản phẩm thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                       
+                        dispose();
+                        new SanPham();
                     } else {
                         JOptionPane.showMessageDialog(null, "Thêm sản phẩm thất bại! Kiểm tra dữ liệu." , "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
@@ -177,11 +168,11 @@ public class Themsp extends BaseFrame {
                 }
             }
         });
-        
+
         getRootPane().setDefaultButton(btnLuu);
         setVisible(true);
-        
-        JTextField[] textFields = {txtTenSP, txtMaSP, txtSoLuong, txtQcdg, txtSolo, txtSodk, txtHSD, txtGia};
+
+        JTextField[] textFields = {txtTenSP, txtMaSP, txtSoLuong, txtQcdg,  txtSodk, txtGia};
 
         for (int i = 0; i < textFields.length; i++) {
             final int currentIndex = i;
@@ -209,20 +200,20 @@ public class Themsp extends BaseFrame {
         comboMaLSP.removeAllItems();
         comboMaLSP.addItem("-- Chọn loại sản phẩm --");
         for (String[] row : loaiSPList) {
-            comboMaLSP.addItem(row[0] + " - " + row[1]); 
+            comboMaLSP.addItem(row[0] + " - " + row[1]);
         }
     }
-    
+
     private void loadHSXVaoComboBox() {
         List<String[]> HSXList = spDAL.getAllHangSanXuat();
         comboHSX.removeAllItems();
         comboHSX.addItem("-- Chọn hãng sản xuất --");
         for (String[] row : HSXList) {
-        	comboHSX.addItem(row[0] + " - " + row[1]); 
+            comboHSX.addItem(row[0] + " - " + row[1]);
         }
     }
-    
-     public static void main(String[] args) {
-         new Themsp();
-     }
+
+    public static void main(String[] args) {
+        new Themsp();
+    }
 }

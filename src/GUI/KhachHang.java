@@ -87,7 +87,7 @@ public class KhachHang extends BaseFrame{
         add(btnThemKH);
 
         
-        String[] columnNames = {"Tên khách hàng", "Mã khách hàng", "Số lần mua", "Điểm tích lũy", "Loại khách hàng"};
+        String[] columnNames = {"Tên khách hàng", "Mã khách hàng", "Điểm tích lũy", "Loại khách hàng", "Số điện thoại"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -115,7 +115,7 @@ public class KhachHang extends BaseFrame{
                         KhachHangDTO kh = bllkhachhang.getKhachHangById(maKhachHang);
                         if (kh != null) {
                             TTCTkh ctkh = new TTCTkh();
-                            ctkh.setThongTin(kh.getHoTen(), kh.getMaKH(), kh.getSoLanMua(), kh.getDiemTichLuy(), kh.getLoaiKhach());
+                            ctkh.setThongTin(kh.getHoTen(), kh.getMaKH(), kh.getDiemTichLuy(), kh.getLoaiKhach(), kh.getSDT());
                             
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy khách hàng!");
@@ -126,14 +126,14 @@ public class KhachHang extends BaseFrame{
         });
         setVisible(true);
 
-        addExceltButton();
+//        addExceltButton();
     }
 
     private void loadKhachHang() {
         model.setRowCount(0); // Xóa tất cả các dòng trong bảng
         List<KhachHangDTO> list = bllkhachhang.layDSKhachHang();
         for (KhachHangDTO kh : list) {
-            model.addRow(new Object[]{kh.getHoTen(), kh.getMaKH(), kh.getSoLanMua(), kh.getDiemTichLuy(), kh.getLoaiKhach()});
+            model.addRow(new Object[]{kh.getHoTen(), kh.getMaKH(), kh.getDiemTichLuy(), kh.getLoaiKhach(), kh.getSDT()});
         }
     }
 
@@ -148,16 +148,16 @@ public class KhachHang extends BaseFrame{
         List<KhachHangDTO> list = bllkhachhang.getKhachHang(keyword);
  
         for (KhachHangDTO kh : list) {
-            model.addRow(new Object[]{kh.getHoTen(), kh.getMaKH(), kh.getSoLanMua(), kh.getDiemTichLuy(), kh.getLoaiKhach()});
+            model.addRow(new Object[]{kh.getHoTen(), kh.getMaKH(), kh.getDiemTichLuy(), kh.getLoaiKhach(), kh.getSDT()});
         }
         System.out.println("Từ khóa tìm kiếm: " + keyword);
         System.out.println("Số khách hàng tìm thấy: " + list.size());
     }
 
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         new KhachHang();

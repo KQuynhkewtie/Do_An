@@ -1,45 +1,53 @@
 package GUI;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 import bll.SanPhamBLL;
 
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
+import dal.dbconnection;
 import dal.SanPhamDAL;
+import dto.LoaiSPDTO;
 import dto.SanPhamDTO;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
-
+import dto.SanPhamDTO;
+import bll.SanPhamBLL;
 public class Capnhatttsp extends BaseFrame {
     private SanPhamBLL bllSanPham = new SanPhamBLL();
-	private SanPhamDAL spDAL= new SanPhamDAL();
-	private JComboBox<String> comboMaLSP, comboHSX;
-	private JTextField  txtTenSP, txtMaSP ,txtMaLSP, txtMaHSX, txtQcdg, txtSodk, txtHSD, txtGia, txtSolo, txtSoLuong;
+    private SanPhamDAL spDAL= new SanPhamDAL();
+    private JComboBox<String> comboMaLSP, comboHSX;
+    private JTextField  txtTenSP, txtMaSP ,txtMaLSP, txtMaHSX, txtQcdg, txtSodk, txtHSD, txtGia, txtSolo, txtSoLuong;
     public Capnhatttsp() {
-    	super("Cập nhật thông tin sản phẩm");
-    	initialize();
-    	}
+        super("Cập nhật thông tin sản phẩm");
+        initialize();
+    }
     @Override
-   	protected void initUniqueComponents() {
-   		 for (JButton btn : menuButtons) {
-   	            if (btn.getText().equals("Sản phẩm")) {
-   	                btn.setBackground(Color.decode("#EF5D7A")); 
-   	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-   	            }
-   	        }
-   	        
-   	        // Các nút khác vẫn giữ màu mặc định
-   	        for (JButton btn : menuButtons) {
-   	            if (!btn.getText().equals("Sản phẩm")) {
-   	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-   	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-   	            }
-   	        }
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+        // Các nút khác vẫn giữ màu mặc định
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Sản phẩm")) {
+                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
         //Tiêu đề "Sản phẩm >> Thông tin sản phẩm" có thể nhấn
         JLabel lblSanPhamLink = new JLabel("<html><u>Sản phẩm</u></html>");
         lblSanPhamLink.setFont(new Font("Arial", Font.BOLD, 20));
@@ -69,12 +77,20 @@ public class Capnhatttsp extends BaseFrame {
         lblTTSanPhamLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                dispose();
-                new TTCTsp();
+                String maSP =  txtMaSP.getText().trim();
+                SanPhamDTO sp = bllSanPham.getSanPhamById(maSP);
+                if (sp != null) {
+                    dispose();
+                    TTCTsp  ctsp = new TTCTsp();
+                    ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(), sp.getMaHSX(), sp.getQuyCachDongGoi(), sp.getSoDangKy(),sp.getGiaBan());
+                    ctsp.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Không tìm thấy sản phẩm!");
+                }
             }
         });
 
-        
+
         // Form nhập sản phẩm
         JLabel lblTenSP = new JLabel("Tên sản phẩm:");
         lblTenSP.setBounds(270, 120, 150, 25);
@@ -92,13 +108,13 @@ public class Capnhatttsp extends BaseFrame {
         txtMaSP.setEditable(false);
         txtMaSP.setFocusable(false);
         add(txtMaSP);
-        
+
         JLabel lblLoaiSP = new JLabel("Loại sản phẩm:");
         lblLoaiSP.setBounds(270, 200, 150, 25);
-        add(lblLoaiSP);        
+        add(lblLoaiSP);
         comboMaLSP = new JComboBox<>();
-        comboMaLSP.setBounds(270, 230, 300, 30); 
-        add(comboMaLSP);        
+        comboMaLSP.setBounds(270, 230, 300, 30);
+        add(comboMaLSP);
         loadLoaiSanPhamVaoComboBox();
 
         JLabel lblSoLuong = new JLabel("Số lượng:");
@@ -115,7 +131,7 @@ public class Capnhatttsp extends BaseFrame {
         comboHSX.setBounds(270, 310, 300, 30);
         add(comboHSX);
         loadHSXVaoComboBox();
-        
+
         JLabel lblqcdg = new JLabel("Quy cách đóng gói:");
         lblqcdg.setBounds(700, 280, 150, 25);
         add(lblqcdg);
@@ -123,12 +139,6 @@ public class Capnhatttsp extends BaseFrame {
         txtQcdg.setBounds(700, 310, 300, 30);
         add(txtQcdg);
 
-        JLabel lblSolo = new JLabel("Số lô:");
-        lblSolo.setBounds(270, 360, 150, 25);
-        add(lblSolo);
-        txtSolo = new JTextField();
-        txtSolo.setBounds(270, 390, 300, 30);
-        add(txtSolo);
 
         JLabel lblSodk = new JLabel("Số đăng ký:");
         lblSodk.setBounds(700, 360, 150, 25);
@@ -137,12 +147,7 @@ public class Capnhatttsp extends BaseFrame {
         txtSodk.setBounds(700, 390, 300, 30);
         add(txtSodk);
 
-        JLabel lblHSD = new JLabel("Hạn sử dụng:");
-        lblHSD.setBounds(270, 440, 150, 25);
-        add(lblHSD);
-        txtHSD = new JTextField();
-        txtHSD.setBounds(270, 470, 300, 30);
-        add(txtHSD);
+
 
         JLabel lblGia = new JLabel("Giá bán:");
         lblGia.setBounds(700, 440, 150, 25);
@@ -161,23 +166,23 @@ public class Capnhatttsp extends BaseFrame {
         btnLuusua.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	
+
                 // Lấy dữ liệu từ các trường nhập
                 String maSP = txtMaSP.getText().trim();
                 String tenSP = txtTenSP.getText().trim();
                 String maLSP = comboMaLSP.getSelectedItem().toString().split(" - ")[0];
                 String maHSX = comboHSX.getSelectedItem().toString().split(" - ")[0];
                 String dongGoi = txtQcdg.getText().trim();
-                String solo = txtSolo.getText().trim();
+
                 String sodk = txtSodk.getText().trim();
-                String hsdStr = txtHSD.getText().trim();
+
                 String soLuongStr = txtSoLuong.getText().trim();
                 String giaStr = txtGia.getText().trim();
-                
+
                 try {
                     int soLuong = Integer.parseInt(soLuongStr);
                     double gia = Double.parseDouble(giaStr);
-                    java.sql.Date hsd = java.sql.Date.valueOf(hsdStr); // định dạng yyyy-MM-dd
+
 
                     // Tạo đối tượng sản phẩm cập nhật
                     SanPhamDTO sp = new SanPhamDTO();
@@ -186,13 +191,12 @@ public class Capnhatttsp extends BaseFrame {
                     sp.setMaLSP(maLSP);
                     sp.setMaHSX(maHSX);
                     sp.setQuyCachDongGoi(dongGoi);
-                    sp.setSoLo(solo);
+
                     sp.setSoDangKy(sodk);
-                    sp.setHangTon(soLuong);
+                    sp.setsoluong(soLuong);
                     sp.setGiaBan(gia);
-                    sp.setHsd(hsd);
                     System.out.println("MASP cần cập nhật: " + maSP);
-                    
+
                     // Gọi hàm cập nhật từ BLL/DAL
                     boolean success = bllSanPham.updateSanPham(sp);
 
@@ -200,7 +204,7 @@ public class Capnhatttsp extends BaseFrame {
                         JOptionPane.showMessageDialog(null, "Cập nhật sản phẩm thành công!");
                         dispose(); // đóng form nếu muốn
                         TTCTsp ctsp = new TTCTsp();
-                        ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getHangTon(), sp.getMaHSX(), sp.getQuyCachDongGoi(), sp.getSoLo(), sp.getSoDangKy(), sp.getHsd().toString(), sp.getGiaBan());
+                        ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(), sp.getMaHSX(), sp.getQuyCachDongGoi(),  sp.getSoDangKy(), sp.getGiaBan());
                     } else {
                         JOptionPane.showMessageDialog(null, "Cập nhật thất bại!");
                     }
@@ -212,7 +216,7 @@ public class Capnhatttsp extends BaseFrame {
         });
         getRootPane().setDefaultButton(btnLuusua);
         setVisible(true);
- }
+    }
 
 
     public void loadProductInfoForUpdate(String maSP) {
@@ -238,10 +242,8 @@ public class Capnhatttsp extends BaseFrame {
             }
             txtGia.setText(String.valueOf(sp.getGiaBan()));
             txtQcdg.setText(sp.getQuyCachDongGoi());
-            txtSolo.setText(sp.getSoLo());
             txtSodk.setText(sp.getSoDangKy());
-            txtSoLuong.setText(String.valueOf(sp.getHangTon()));
-            txtHSD.setText(sp.getHsd().toString());
+            txtSoLuong.setText(String.valueOf(sp.getsoluong()));
         } else {
             JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm!");
         }
@@ -251,16 +253,16 @@ public class Capnhatttsp extends BaseFrame {
         comboMaLSP.removeAllItems();
         comboMaLSP.addItem("-- Chọn loại sản phẩm --");
         for (String[] row : loaiSPList) {
-            comboMaLSP.addItem(row[0] + " - " + row[1]); 
+            comboMaLSP.addItem(row[0] + " - " + row[1]);
         }
     }
-    
+
     private void loadHSXVaoComboBox() {
         List<String[]> HSXList = spDAL.getAllHangSanXuat();
         comboHSX.removeAllItems();
         comboHSX.addItem("-- Chọn hãng sản xuất --");
         for (String[] row : HSXList) {
-        	comboHSX.addItem(row[0] + " - " + row[1]); 
+            comboHSX.addItem(row[0] + " - " + row[1]);
         }
     }
 

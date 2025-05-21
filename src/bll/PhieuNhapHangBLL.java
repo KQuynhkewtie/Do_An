@@ -48,8 +48,8 @@ public class PhieuNhapHangBLL {
                 // Cập nhật số lượng tồn kho
                 SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
                 if (sp != null) {
-                    sp.setHangTon(sp.getHangTon() + ct.getSoLuongNhap());
-                    if (!spDAL.capNhatSanPham(sp, conn)) {
+                    sp.setsoluong(sp.getsoluong() + ct.getSoLuongNhap());
+                    if (!spDAL.updateSanPham(sp)) {
                         conn.rollback();
                         return false;
                     }
@@ -92,8 +92,8 @@ public class PhieuNhapHangBLL {
                 // Trừ số lượng tồn kho trước khi xóa chi tiết
                 SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
                 if (sp != null) {
-                    sp.setHangTon(sp.getHangTon() - ct.getSoLuongNhap());
-                    if (!spDAL.capNhatSanPham(sp, conn)) {
+                    sp.setsoluong(sp.getsoluong() - ct.getSoLuongNhap());
+                    if (!spDAL.updateSanPham(sp)) {
                         conn.rollback();
                         return false;
                     }
@@ -155,8 +155,8 @@ public class PhieuNhapHangBLL {
                     // Trừ số lượng tồn kho khi xóa chi tiết
                     SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctCu.getMaSP(), conn);
                     if (sp != null) {
-                        sp.setHangTon(sp.getHangTon() - ctCu.getSoLuongNhap());
-                        if (!spDAL.capNhatSanPham(sp, conn)) {
+                        sp.setsoluong(sp.getsoluong() - ctCu.getSoLuongNhap());
+                        if (!spDAL.updateSanPham(sp)){
                             conn.rollback();
                             return false;
                         }
@@ -183,8 +183,8 @@ public class PhieuNhapHangBLL {
                     if (soLuongThayDoi != 0) {
                         SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
                         if (sp != null) {
-                            sp.setHangTon(sp.getHangTon() + soLuongThayDoi);
-                            if (!spDAL.capNhatSanPham(sp, conn)) {
+                            sp.setsoluong(sp.getsoluong() + soLuongThayDoi);
+                            if (!spDAL.updateSanPham(sp)) {
                                 conn.rollback();
                                 return false;
                             }
@@ -204,8 +204,8 @@ public class PhieuNhapHangBLL {
 
                     SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
                     if (sp != null) {
-                        sp.setHangTon(sp.getHangTon() + ctMoi.getSoLuongNhap());
-                        if (!spDAL.capNhatSanPham(sp, conn)) {
+                        sp.setsoluong(sp.getsoluong() + ctMoi.getSoLuongNhap());
+                        if (!spDAL.updateSanPham(sp)) {
                             conn.rollback();
                             return false;
                         }

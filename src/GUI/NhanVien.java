@@ -129,7 +129,7 @@ public class NhanVien extends BaseFrame {
 
         setVisible(true);
 
-        addExceltButton();
+        //addExceltButton();
     }
     private void loadNhanVien() {
         model.setRowCount(0); // Xóa tất cả các dòng trong bảng
@@ -155,11 +155,11 @@ public class NhanVien extends BaseFrame {
             model.addRow(new Object[]{nv.getMaNhanVien(), nv.getHoTen(),  nv.getCccd(), nv.getSdt(), nv.getViTriCongViec(), nv.getMaSoThue()});
         }
     }
-
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         new NhanVien();

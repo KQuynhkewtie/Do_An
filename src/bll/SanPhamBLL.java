@@ -16,19 +16,9 @@ public class SanPhamBLL {
         return spDAL.getAllSanPham();
     }
 
-    // Thêm sản phẩm mới
-    public boolean addSanPham(SanPhamDTO sp) {
-        return spDAL.insertSanPham(sp);
-    }
-
     // Cập nhật thông tin sản phẩm
     public boolean updateSanPham(SanPhamDTO sp) {
         return spDAL.updateSanPham(sp);
-    }
-
-    // Xóa sản phẩm theo tên
-    public boolean deleteSanPhamByName(String tenSP) {
-        return spDAL.deleteSanPhamByName(tenSP);
     }
 
     // Tìm kiếm sản phẩm theo từ khóa
@@ -39,11 +29,5 @@ public class SanPhamBLL {
     public SanPhamDTO getSanPhamById(String maSP) {
         return spDAL.getSanPhamById(maSP);
     }
-    
-    public boolean deleteSanPhamById(String maSP) {
-        return spDAL.deleteSanPhamById(maSP);
-    }
-    
-    
 
 }

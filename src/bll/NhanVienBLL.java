@@ -34,9 +34,9 @@ public class NhanVienBLL {
         return nhanVienDAL.getNhanVien(keyword);
     }
 
-//    //Để hiển thị theo tên ở pnh và hd
-//    public List<NhanVienDTO> getNhanVienByTen(String tenNV) {
-//        return nhanVienDAL.getNhanVienByTen(tenNV);
-//    }
+    //Để hiển thị theo tên ở pnh và hd
+    public List<NhanVienDTO> getNhanVienByTen(String tenNV) {
+        return nhanVienDAL.getNhanVienByTen(tenNV);
+    }
 }
 

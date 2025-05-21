@@ -23,10 +23,8 @@ public class SanPhamDAL {
                         rs.getString("MALSP"),
                         rs.getString("TENSP"),
                         rs.getString("QUYCACHDONGGOI"),
-                        rs.getString("SOLO"),
                         rs.getString("SODANGKY"),
-                        rs.getDate("HSD"),
-                        rs.getInt("HANGTON"),
+                        rs.getInt("SOLUONG"),
                         rs.getDouble("GIABAN")
                 );
                 danhSachSP.add(sp);
@@ -53,10 +51,8 @@ public class SanPhamDAL {
                         rs.getString("MALSP"),
                         rs.getString("TENSP"),
                         rs.getString("QUYCACHDONGGOI"),
-                        rs.getString("SOLO"),
                         rs.getString("SODANGKY"),
-                        rs.getDate("HSD"),
-                        rs.getInt("HANGTON"),
+                        rs.getInt("SOLUONG"),
                         rs.getDouble("GIABAN")
                 );
             }
@@ -103,7 +99,7 @@ public class SanPhamDAL {
 
     // Thêm sản phẩm mới
     public boolean insertSanPham(SanPhamDTO sp) {
-        String sql = "INSERT INTO SANPHAM (MASP, MAHSX, MALSP, TENSP, QUYCACHDONGGOI, SOLO, SODANGKY, HSD, HANGTON, GIABAN) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO SANPHAM (MASP, MAHSX, MALSP, TENSP, QUYCACHDONGGOI, SODANGKY, SOLUONG, GIABAN) VALUES (?, ?, ?, ?, ?, ?, ?, ?, )";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -112,17 +108,9 @@ public class SanPhamDAL {
             ps.setString(3, sp.getMaLSP());
             ps.setString(4, sp.getTenSP());
             ps.setString(5, sp.getQuyCachDongGoi());
-            ps.setString(6, sp.getSoLo());
-            ps.setString(7, sp.getSoDangKy());
-
-            if (sp.getHsd() != null) {
-                ps.setDate(8, new java.sql.Date(sp.getHsd().getTime()));
-            } else {
-                ps.setNull(8, Types.DATE);
-            }
-
-            ps.setInt(9, sp.getHangTon());
-            ps.setDouble(10, sp.getGiaBan());
+            ps.setString(6, sp.getSoDangKy());
+            ps.setInt(7, sp.getsoluong());
+            ps.setDouble(8, sp.getGiaBan());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -170,11 +158,13 @@ public class SanPhamDAL {
     // Tìm kiếm sản phẩm theo tên
     public List<SanPhamDTO> getSanPham(String keyword) {
         List<SanPhamDTO> danhSachSP = new ArrayList<>();
-        String sql = "SELECT * FROM SANPHAM WHERE LOWER(TENSP) LIKE ?";
+        String sql = "SELECT * FROM SANPHAM WHERE LOWER(TENSP) LIKE ? OR LOWER(MASP) LIKE ? OR LOWER(MALSP) LIKE ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword.toLowerCase() + "%");
+            ps.setString(2, "%" + keyword.toLowerCase()+ "%");
+            ps.setString(3, "%" + keyword.toLowerCase()+ "%");
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -184,10 +174,8 @@ public class SanPhamDAL {
                         rs.getString("MALSP"),
                         rs.getString("TENSP"),
                         rs.getString("QUYCACHDONGGOI"),
-                        rs.getString("SOLO"),
                         rs.getString("SODANGKY"),
-                        rs.getDate("HSD"),
-                        rs.getInt("HANGTON"),
+                        rs.getInt("SOLUONG"),
                         rs.getDouble("GIABAN")
                 );
                 danhSachSP.add(sp);
@@ -212,30 +200,33 @@ public class SanPhamDAL {
     }
 
     public boolean updateSanPham(SanPhamDTO sp) {
-        String sql = "UPDATE SANPHAM SET MALSP=?, MAHSX=?, TENSP=?, QUYCACHDONGGOI=?, SOLO=?, SODANGKY=?, HSD=?, HANGTON=?, GIABAN=? WHERE TRIM(MASP) = ?";
+        String sql = "UPDATE SANPHAM SET MALSP=?, MAHSX=?, TENSP=?, QUYCACHDONGGOI=?, SODANGKY=?, SOLUONG=?, GIABAN=? WHERE TRIM(MASP) = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            System.out.println("Đang cập nhật sản phẩm: " + sp);
-            System.out.println("Mã SP: " + sp.getMaSP());
-
+// Set các giá trị vào PreparedStatement
             ps.setString(1, sp.getMaLSP());
             ps.setString(2, sp.getMaHSX());
             ps.setString(3, sp.getTenSP());
             ps.setString(4, sp.getQuyCachDongGoi());
-            ps.setString(5, sp.getSoLo());
-            ps.setString(6, sp.getSoDangKy());
+            ps.setString(5, sp.getSoDangKy());
+            ps.setInt(6, sp.getsoluong());
+            ps.setDouble(7, sp.getGiaBan());
 
-            if (sp.getHsd() != null) {
-                ps.setDate(7, new java.sql.Date(sp.getHsd().getTime()));
-            } else {
-                ps.setNull(7, Types.DATE);
-            }
+            // Set giá trị MASP cho phần WHERE, loại bỏ khoảng trắng dư
+            ps.setString(8, sp.getMaSP().trim());
 
-            ps.setInt(8, sp.getHangTon());
-            ps.setDouble(9, sp.getGiaBan());
-            ps.setString(10, sp.getMaSP().trim());
+            // Hiển thị giá trị truyền vào
+            System.out.println("Giá trị truyền vào UPDATE:");
+            System.out.println("1. TENSP: " + sp.getTenSP());
+            System.out.println("2. SOLUONG: " + sp.getsoluong());
+            System.out.println("3. DONGIA: " + sp.getGiaBan());
+            System.out.println("4. QCDG: " + sp.getQuyCachDongGoi());
+            System.out.println("5. Solo: " + sp.getSoDangKy());
+            System.out.println("7. MALOAI: " + sp.getMaLSP());
+            System.out.println("8. MAhsx: " + sp.getMaHSX());
+            System.out.println("10. MASP (WHERE): " + sp.getMaSP().trim());
 
+// Thực hiện câu lệnh UPDATE và kiểm tra số lượng bản ghi bị ảnh hưởng
             int rows = ps.executeUpdate();
             System.out.println("Rows affected: " + rows);
 
@@ -284,10 +275,8 @@ public class SanPhamDAL {
                         rs.getString("MALSP"),
                         rs.getString("TENSP"),
                         rs.getString("QUYCACHDONGGOI"),
-                        rs.getString("SOLO"),
                         rs.getString("SODANGKY"),
-                        rs.getDate("HSD"),
-                        rs.getInt("HANGTON"),
+                        rs.getInt("SOLUONG"),
                         rs.getDouble("GIABAN")
                 );
             }
@@ -301,54 +290,46 @@ public class SanPhamDAL {
         return sp;
     }
 
-    // Cập nhật sản phẩm (có thể sử dụng connection từ bên ngoài)
-    public boolean capNhatSanPham(SanPhamDTO sp, Connection conn) {
-        String sql = "UPDATE SANPHAM SET MALSP=?, MAHSX=?, TENSP=?, QUYCACHDONGGOI=?, SOLO=?, SODANGKY=?, HSD=?, HANGTON=?, GIABAN=? WHERE TRIM(MASP) = ?";
-        boolean shouldClose = false;
-
-        try {
-            if (conn == null) {
-                conn = DatabaseHelper.getConnection();
-                shouldClose = true;
-            }
-
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, sp.getMaLSP());
-            ps.setString(2, sp.getMaHSX());
-            ps.setString(3, sp.getTenSP());
-            ps.setString(4, sp.getQuyCachDongGoi());
-            ps.setString(5, sp.getSoLo());
-            ps.setString(6, sp.getSoDangKy());
-
-            if (sp.getHsd() != null) {
-                ps.setDate(7, new java.sql.Date(sp.getHsd().getTime()));
-            } else {
-                ps.setNull(7, Types.DATE);
-            }
-
-            ps.setInt(8, sp.getHangTon());
-            ps.setDouble(9, sp.getGiaBan());
-            ps.setString(10, sp.getMaSP().trim());
-
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Lỗi cập nhật sản phẩm: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        } finally {
-            if (shouldClose && conn != null) {
-                DatabaseHelper.closeConnection(conn);
-            }
-        }
-    }
+//    // Cập nhật sản phẩm (có thể sử dụng connection từ bên ngoài)
+//    public boolean capNhatSanPham(SanPhamDTO sp, Connection conn) {
+//        String sql = "UPDATE SANPHAM SET MALSP=?, MAHSX=?, TENSP=?, QUYCACHDONGGOI=?, SOLO=?, SODANGKY=?, HSD=?, HANGTON=?, GIABAN=? WHERE TRIM(MASP) = ?";
+//        boolean shouldClose = false;
+//
+//        try {
+//            if (conn == null) {
+//                conn = DatabaseHelper.getConnection();
+//                shouldClose = true;
+//            }
+//
+//            PreparedStatement ps = conn.prepareStatement(sql);
+//            ps.setString(1, sp.getMaSP());
+//            ps.setString(2, sp.getMaHSX());
+//            ps.setString(3, sp.getMaLSP());
+//            ps.setString(4, sp.getTenSP());
+//            ps.setString(5, sp.getQuyCachDongGoi());
+//            ps.setString(6, sp.getSoDangKy());
+//            ps.setInt(7, sp.getsoluong());
+//            ps.setDouble(8, sp.getGiaBan());
+//
+//            return ps.executeUpdate() > 0;  // Trả về true nếu thêm thành công
+//        } catch (SQLException e) {
+//            System.err.println("Lỗi cập nhật sản phẩm: " + e.getMessage());
+//            e.printStackTrace();
+//            return false;
+//        } finally {
+//            if (shouldClose && conn != null) {
+//                DatabaseHelper.closeConnection(conn);
+//            }s
+//        }
+//    }
 
     public int getSoLuongTon(String maSP) throws SQLException {
-        String sql = "SELECT HANGTON FROM SANPHAM WHERE MASP = ?";
+        String sql = "SELECT SOLUONG FROM SANPHAM WHERE TRIM(MASP) = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maSP);
+            pst.setString(1, maSP.trim());
             ResultSet rs = pst.executeQuery();
-            return rs.next() ? rs.getInt("HANGTON") : 0;
+            return rs.next() ? rs.getInt("SOLUONG") : 0;
         }
     }
 }

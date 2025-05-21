@@ -1,18 +1,21 @@
 package dto;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 public class ChiTietHoaDonDTO {
     private String maHoaDon;
     private String maSanPham;
-    private int soLuong;
-    private double gia;
+    private int soLuongNhap;
+    private double giaNhap;
 
     public ChiTietHoaDonDTO() {}
 
-    public ChiTietHoaDonDTO(String maHoaDon, String maSanPham, int soLuong, double gia) {
+    public ChiTietHoaDonDTO(String maHoaDon, String maSanPham,  int soLuongNhap, double giaNhap) {
         this.maHoaDon = maHoaDon;
         this.maSanPham = maSanPham;
-        this.soLuong = soLuong;
-        this.gia = gia;
+        this.soLuongNhap = soLuongNhap;
+        this.giaNhap = giaNhap;
     }
 
     // Getter và Setter
@@ -22,10 +25,10 @@ public class ChiTietHoaDonDTO {
     public String getMaSanPham() { return maSanPham; }
     public void setMaSanPham(String maSanPham) { this.maSanPham = maSanPham; }
 
-    public int getSoLuong() { return soLuong; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
+    public int getSoLuong() { return soLuongNhap; }
+    public void setSoLuong(int soLuong) { this.soLuongNhap = soLuong; }
 
-    public double getGia() { return gia; }
-    public void setGia(double gia) { this.gia = gia; }
+    public double getGia() { return giaNhap; }
+    public void setGia(double gia) { this.giaNhap = gia; }
 
 }

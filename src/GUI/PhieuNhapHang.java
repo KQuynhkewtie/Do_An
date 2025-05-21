@@ -62,7 +62,7 @@ public class PhieuNhapHang extends BaseFrame {
 
         loadDataToTable();
 
-        addExceltButton();
+//        addExceltButton();
     }
 
     private void initSearchComponents() {
@@ -260,10 +260,10 @@ public class PhieuNhapHang extends BaseFrame {
         }
     }
 
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

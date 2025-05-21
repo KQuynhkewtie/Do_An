@@ -136,7 +136,7 @@ public class HangSX extends BaseFrame {
 
         setVisible(true);
 
-        addExceltButton();
+        //addExceltButton();
     }
     private void loadHSX() {
         model.setRowCount(0); // Xóa tất cả các dòng trong bảng
@@ -162,11 +162,11 @@ public class HangSX extends BaseFrame {
             model.addRow(new Object[]{hsx.getMaHSX(), hsx.getTenHSX(), hsx.getMaSoThue(), hsx.getDiaChi(), hsx.getSdt()});
         }
     }
-
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         new HangSX();

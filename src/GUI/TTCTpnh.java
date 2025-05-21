@@ -140,6 +140,8 @@ public class TTCTpnh extends BaseFrame {
         tableModel.addColumn("Mã sản phẩm");
         tableModel.addColumn("Số lượng");
         tableModel.addColumn("Giá nhập");
+        tableModel.addColumn("Hạn sử dụng");
+        tableModel.addColumn("Số lô");
         tableModel.addColumn("Thành tiền");
 
         table = new JTable(tableModel);
@@ -147,7 +149,6 @@ public class TTCTpnh extends BaseFrame {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(270, 360, 800, 200);
         add(scrollPane);
@@ -208,12 +209,16 @@ public class TTCTpnh extends BaseFrame {
 
                 List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = pnhBLL.layChiTietPhieuNhapHang(maPNH);
                 tableModel.setRowCount(0);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
                 for (ChiTietPhieuNhapHangDTO ct : danhSachChiTiet) {
                     double thanhTien = ct.getSoLuongNhap() * ct.getGiaNhap();
                     tableModel.addRow(new Object[]{
                             ct.getMaSP(),
                             ct.getSoLuongNhap(),
                             String.format("%,.0f VND", ct.getGiaNhap()),
+                            ct.getHsd() != null ? dateFormat.format(ct.getHsd()) : "N/A",
+                            ct.getSoLo() != null ? ct.getSoLo() : "N/A",
                             String.format("%,.0f VND", thanhTien)
                     });
                 }

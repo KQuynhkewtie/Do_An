@@ -4,20 +4,19 @@ package dto;
 public class KhachHangDTO {
     private String maKH;
     private String hoTen;
-    private int soLanMua;
     private double diemTichLuy;
     private String loaiKhach;
+    private String sdt;
 
-    // Constructor không tham số
     public KhachHangDTO() {}
 
     // Constructor đầy đủ tham số
-    public KhachHangDTO(String maKH, String hoTen, int soLanMua, double diemTichLuy, String loaiKhach) {
+    public KhachHangDTO(String maKH, String hoTen, double diemTichLuy, String loaiKhach, String sdt) {
         this.maKH = maKH;
         this.hoTen = hoTen;
-        this.soLanMua = soLanMua;
         this.diemTichLuy = diemTichLuy;
         this.loaiKhach = loaiKhach;
+        this.sdt = sdt;
     }
 
     // Getter & Setter
@@ -37,14 +36,6 @@ public class KhachHangDTO {
         this.hoTen = hoTen;
     }
 
-    public int getSoLanMua() {
-        return soLanMua;
-    }
-
-    public void setSoLanMua(int soLanMua) {
-        this.soLanMua = soLanMua;
-    }
-
     public double getDiemTichLuy() {
         return diemTichLuy;
     }
@@ -61,9 +52,18 @@ public class KhachHangDTO {
         this.loaiKhach = loaiKhach;
     }
 
+    public String getSDT() {
+        return sdt;
+    }
+
+    public void setSDT() {
+        this.sdt = sdt;
+    }
+
+
     @Override
     public String toString() {
-        return "Mã KH: " + maKH + " | Họ tên: " + hoTen + " | Số lần mua: " + soLanMua +
+        return "Mã KH: " + maKH + " | Họ tên: " + hoTen +
                " | Điểm tích lũy: " + diemTichLuy + " | Loại khách: " + loaiKhach;
     }
 }

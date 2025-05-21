@@ -3,6 +3,7 @@ package GUI;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import com.toedter.calendar.JDateChooser;
 import bll.PhieuNhapHangBLL;
 import dto.PhieuNhapHangDTO;
 import dto.ChiTietPhieuNhapHangDTO;
@@ -20,7 +22,8 @@ import dto.SanPhamDTO;
 
 public class Capnhatttpnh extends BaseFrame {
     private DefaultTableModel tableModel;
-    private JTextField txtMaNCU, txtMaNV, txtNgay, txtMaPNH;
+    private JTextField txtMaNCU, txtMaNV, txtMaPNH;
+    private JDateChooser dateChooserNgay;
     private PhieuNhapHangBLL pnhBLL = new PhieuNhapHangBLL();
     private String maPNH;
     private SanPhamDAL spDAL = new SanPhamDAL();
@@ -134,18 +137,26 @@ public class Capnhatttpnh extends BaseFrame {
         JLabel lblngay = new JLabel("Ngày lập phiếu:");
         lblngay.setBounds(700, 200, 150, 25);
         add(lblngay);
-        txtNgay = new JTextField();
-        txtNgay.setBounds(700, 230, 300, 30);
-        add(txtNgay);
+        dateChooserNgay = new JDateChooser();
+        dateChooserNgay.setBounds(700, 230, 300, 30);
+        dateChooserNgay.setDateFormatString("dd/MM/yyyy");
+        dateChooserNgay.getCalendarButton().setText("...");
+        add(dateChooserNgay);
     }
 
     private void initTableSection() {
-        String[] columns = {"Mã sản phẩm", "Tên sản phẩm", "Số lượng nhập", "Giá nhập (VND)"};
+        String[] columns = {"Mã sản phẩm", "Tên sản phẩm", "Số lượng nhập", "Giá nhập (VND)", "Hạn sử dụng", "Số lô"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                // Chỉ cho phép chỉnh sửa cột số lượng (2) và giá nhập (3)
-                return column == 2 || column == 3;
+                // Allow editing quantity, price, expiry date and batch number
+                return column >= 2 && column <= 5;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 4) return Date.class; // HSD column
+                return Object.class;
             }
         };
 
@@ -153,20 +164,20 @@ public class Capnhatttpnh extends BaseFrame {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         table.setRowHeight(30);
 
-        // Thiết lập renderer cho các cột không được chỉnh sửa (0 và 1)
-        DefaultTableCellRenderer nonEditableRenderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setBackground(new Color(240, 240, 240));
-                return c;
-            }
-        };
-
-        // Áp dụng renderer cho cột 0 và 1
-        table.getColumnModel().getColumn(0).setCellRenderer(nonEditableRenderer);
-        table.getColumnModel().getColumn(1).setCellRenderer(nonEditableRenderer);
+//        // Thiết lập renderer cho các cột không được chỉnh sửa (0 và 1)
+//        DefaultTableCellRenderer nonEditableRenderer = new DefaultTableCellRenderer() {
+//            @Override
+//            public Component getTableCellRendererComponent(JTable table, Object value,
+//                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//                c.setBackground(new Color(240, 240, 240));
+//                return c;
+//            }
+//        };
+//
+//        // Áp dụng renderer cho cột 0 và 1
+//        table.getColumnModel().getColumn(0).setCellRenderer(nonEditableRenderer);
+//        table.getColumnModel().getColumn(1).setCellRenderer(nonEditableRenderer);
 
         // Định dạng hiển thị số cho cột giá nhập (3)
         DefaultTableCellRenderer numberRenderer = new DefaultTableCellRenderer() {
@@ -180,6 +191,64 @@ public class Capnhatttpnh extends BaseFrame {
             }
         };
         table.getColumnModel().getColumn(3).setCellRenderer(numberRenderer);
+
+        table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JTextField()) {
+            private JDateChooser dateChooser = new JDateChooser();
+            private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                dateChooser.setDateFormatString("dd/MM/yyyy");
+                if (value instanceof Date) {
+                    dateChooser.setDate((Date) value);
+                } else if (value != null && !value.toString().isEmpty()) {
+                    try {
+                        dateChooser.setDate(dateFormat.parse(value.toString()));
+                    } catch (Exception e) {
+                        dateChooser.setDate(new Date());
+                    }
+                } else {
+                    dateChooser.setDate(new Date());
+                }
+                return dateChooser;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return dateChooser.getDate() != null ? dateFormat.format(dateChooser.getDate()) : "";
+            }
+        });
+
+        // Set up renderer for HSD column
+        table.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+            private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                if (value instanceof Date) {
+                    value = dateFormat.format((Date) value);
+                }
+                return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            }
+        });
+
+        // Set up renderer for non-editable columns
+        DefaultTableCellRenderer nonEditableRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (column < 2) { // Mã SP and Tên SP columns
+                    c.setBackground(new Color(240, 240, 240));
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(nonEditableRenderer);
+        }
 
         // Validate dữ liệu nhập vào cho cột số lượng (2) và giá nhập (3)
         table.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
@@ -371,14 +440,15 @@ public class Capnhatttpnh extends BaseFrame {
 
             txtMaNV.setText(pnh.getMaNhanVien());
             txtMaNCU.setText(pnh.getMaNCU());
-            txtNgay.setText(pnh.getNgayLapPhieu() != null ?
-                    new SimpleDateFormat("dd/MM/yyyy").format(pnh.getNgayLapPhieu()) :
-                    new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+            dateChooserNgay.setDate(pnh.getNgayLapPhieu() != null ?
+                    pnh.getNgayLapPhieu() :
+                    new Date());
 
             List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = pnhBLL.layChiTietPhieuNhapHang(maPNH);
             tableModel.setRowCount(0);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
             for (ChiTietPhieuNhapHangDTO ct : danhSachChiTiet) {
-                // Lấy thông tin tên sản phẩm từ CSDL
                 SanPhamDTO sp = spDAL.getSanPhamById(ct.getMaSP());
                 String tenSP = sp != null ? sp.getTenSP() : "Không xác định";
 
@@ -386,7 +456,9 @@ public class Capnhatttpnh extends BaseFrame {
                         ct.getMaSP(),
                         tenSP,
                         ct.getSoLuongNhap(),
-                        ct.getGiaNhap()
+                        ct.getGiaNhap(),
+                        ct.getHsd() != null ? dateFormat.format(ct.getHsd()) : "",
+                        ct.getSoLo() != null ? ct.getSoLo() : ""
                 });
             }
         }
@@ -394,19 +466,14 @@ public class Capnhatttpnh extends BaseFrame {
 
     private void luuPhieuNhapHang() {
         // Validate dữ liệu cơ bản
-        if (txtMaNCU.getText().trim().isEmpty() || txtMaNV.getText().trim().isEmpty() || txtNgay.getText().trim().isEmpty()) {
+        if (txtMaNCU.getText().trim().isEmpty() || txtMaNV.getText().trim().isEmpty() ||
+                dateChooserNgay.getDate() == null) {  // Changed validation
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // Validate ngày
-        Date ngayLap;
-        try {
-            ngayLap = new SimpleDateFormat("dd/MM/yyyy").parse(txtNgay.getText());
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Ngày không hợp lệ! Vui lòng nhập theo định dạng dd/MM/yyyy", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        Date ngayLap = dateChooserNgay.getDate();
 
         // Validate nhân viên và nhà cung ứng
         if (!pnhBLL.kiemTraNhanVienTonTai(txtMaNV.getText())) {
@@ -421,13 +488,17 @@ public class Capnhatttpnh extends BaseFrame {
 
         // Lấy dữ liệu từ bảng
         List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             try {
-                String maSP = tableModel.getValueAt(i, 0) != null ? tableModel.getValueAt(i, 0).toString().trim() : "";
-                String slStr = tableModel.getValueAt(i, 2) != null ? tableModel.getValueAt(i, 2).toString().trim() : "";
-                String giaStr = tableModel.getValueAt(i, 3) != null ? tableModel.getValueAt(i, 3).toString().trim() : "";
+                String maSP = tableModel.getValueAt(i, 0).toString().trim();
+                String slStr = tableModel.getValueAt(i, 2).toString().trim();
+                String giaStr = tableModel.getValueAt(i, 3).toString().trim();
+                String hsdStr = tableModel.getValueAt(i, 4).toString().trim();
+                String soLo = tableModel.getValueAt(i, 5).toString().trim();
 
-                if (maSP.isEmpty() || slStr.isEmpty() || giaStr.isEmpty()) {
+                if (maSP.isEmpty() || slStr.isEmpty() || giaStr.isEmpty() || hsdStr.isEmpty()) {
                     JOptionPane.showMessageDialog(this,
                             "Dòng " + (i+1) + ": Vui lòng nhập đầy đủ thông tin chi tiết!",
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -436,6 +507,7 @@ public class Capnhatttpnh extends BaseFrame {
 
                 int soLuong = Integer.parseInt(slStr.replaceAll("[^\\d]", ""));
                 double giaNhap = Double.parseDouble(giaStr.replaceAll("[^\\d.]", ""));
+                Date hsd = dateFormat.parse(hsdStr);
 
                 if (soLuong <= 0 || giaNhap <= 0) {
                     JOptionPane.showMessageDialog(this,
@@ -444,10 +516,14 @@ public class Capnhatttpnh extends BaseFrame {
                     return;
                 }
 
-                danhSachChiTiet.add(new ChiTietPhieuNhapHangDTO(maPNH, maSP, soLuong, giaNhap));
-            } catch (NumberFormatException e) {
+                // Create detail with all fields including HSD and SoLo
+                ChiTietPhieuNhapHangDTO ct = new ChiTietPhieuNhapHangDTO(
+                        maPNH, maSP, hsd, soLo, soLuong, giaNhap
+                );
+                danhSachChiTiet.add(ct);
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
-                        "Dòng " + (i+1) + ": Dữ liệu số không hợp lệ!",
+                        "Dòng " + (i+1) + ": Dữ liệu không hợp lệ! " + e.getMessage(),
                         "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }

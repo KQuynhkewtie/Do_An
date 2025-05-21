@@ -12,7 +12,7 @@ import dto.NhaCungUngDTO;
 public class ncudal {
     public ArrayList<NhaCungUngDTO> layDSNCU() {
         ArrayList<NhaCungUngDTO> ds = new ArrayList<>();
-        String query = "SELECT * FROM NHACUNGCAP";
+        String query = "SELECT * FROM NHACUNGUNG";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -37,7 +37,7 @@ public class ncudal {
 
     public NhaCungUngDTO getNCUById(String maNCU) {
         NhaCungUngDTO ncu = null;
-        String query = "SELECT * FROM NHACUNGCAP WHERE MANCU = ?";
+        String query = "SELECT * FROM NHACUNGUNG WHERE MANCU = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -61,7 +61,7 @@ public class ncudal {
     }
 
     public boolean insertncu(NhaCungUngDTO ncu) {
-        String sql = "INSERT INTO NHACUNGCAP (MANCU, TENNCU, MASOTHUE, DIACHI, SDT, EMAIL) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO NHACUNGUNG (MANCU, TENNCU, MASOTHUE, DIACHI, SDT, EMAIL) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -80,7 +80,7 @@ public class ncudal {
 
     public List<NhaCungUngDTO> getncu(String keyword) {
         List<NhaCungUngDTO> danhSachNCU = new ArrayList<>();
-        String sql = "SELECT * FROM NHACUNGCAP WHERE LOWER(TENNCU) LIKE ?";
+        String sql = "SELECT * FROM NHACUNGUNG WHERE LOWER(TENNCU) LIKE ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,7 +105,7 @@ public class ncudal {
     }
 
     public boolean deleteNCUByName(String tenNCU) {
-        String sql = "DELETE FROM NHACUNGCAP WHERE TENNCU = ?";
+        String sql = "DELETE FROM NHACUNGUNG WHERE TENNCU = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -118,7 +118,7 @@ public class ncudal {
     }
 
     public boolean updateNCU(NhaCungUngDTO ncu) {
-        String sql = "UPDATE NHACUNGCAP SET TENNCU=?, MASOTHUE=?, DIACHI=?, SDT=?, EMAIL=? WHERE TRIM(MANCU) = ?";
+        String sql = "UPDATE NHACUNGUNG SET TENNCU=?, MASOTHUE=?, DIACHI=?, SDT=?, EMAIL=? WHERE TRIM(MANCU) = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -140,7 +140,7 @@ public class ncudal {
     }
 
     public boolean deleteNCUById(String maNCU) {
-        String sql = "DELETE FROM NHACUNGCAP WHERE MANCU = ?";
+        String sql = "DELETE FROM NHACUNGUNG WHERE MANCU = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maNCU);
@@ -153,7 +153,7 @@ public class ncudal {
 
     public List<NhaCungUngDTO> getNCUByTen(String tenNCU) {
         List<NhaCungUngDTO> danhSachNCU = new ArrayList<>();
-        String sql = "SELECT * FROM NHACUNGCAP WHERE LOWER(TENNCU) LIKE ?";
+        String sql = "SELECT * FROM NHACUNGUNG WHERE LOWER(TENNCU) LIKE ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

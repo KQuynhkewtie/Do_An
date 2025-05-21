@@ -71,7 +71,7 @@ public class HoaDon extends BaseFrame {
 
         loadDataToTable();
 
-        addExceltButton();
+        //addExceltButton();
     }
 
     private void initSearchComponents() {
@@ -324,10 +324,10 @@ public class HoaDon extends BaseFrame {
         loadDataToTable();
     }
 
-    @Override
-    protected void addExceltButton() {
-        super.addExceltButton();
-    }
+//    @Override
+//    protected void addExceltButton() {
+//        super.addExceltButton();
+//    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

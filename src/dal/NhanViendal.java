@@ -9,7 +9,7 @@ import java.util.List;
 public class NhanViendal {
 
     public boolean insertNhanVien(NhanVienDTO nv) {
-        String sql = "INSERT INTO NhanVien (maNhanVien, hoTen, cccd, sdt, viTriCongViec, maSoThue) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO NhanVien (MANV, hoTen, cccd, sdt, MAVT, maSoThue) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nv.getMaNhanVien());
@@ -26,7 +26,7 @@ public class NhanViendal {
     }
 
     public boolean updateNhanVien(NhanVienDTO nv) {
-        String sql = "UPDATE NhanVien SET hoTen = ?, cccd = ?, sdt = ?, viTriCongViec = ?, maSoThue = ? WHERE TRIM(maNhanVien) = ?";
+        String sql = "UPDATE NhanVien SET hoTen = ?, cccd = ?, sdt = ?, MAVT = ?, maSoThue = ? WHERE TRIM(MANV) = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nv.getHoTen());
@@ -48,7 +48,7 @@ public class NhanViendal {
     }
 
     public boolean deleteNhanVien(String maNhanVien) {
-        String sql = "DELETE FROM NhanVien WHERE maNhanVien = ?";
+        String sql = "DELETE FROM NhanVien WHERE MANV = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, maNhanVien);
@@ -68,11 +68,11 @@ public class NhanViendal {
 
             while (rs.next()) {
                 danhSach.add(new NhanVienDTO(
-                        rs.getString("maNhanVien"),
+                        rs.getString("MANV"),
                         rs.getString("hoTen"),
                         rs.getString("cccd"),
                         rs.getString("sdt"),
-                        rs.getString("viTriCongViec"),
+                        rs.getString("MAVT"),
                         rs.getString("maSoThue")
                 ));
             }
@@ -83,18 +83,18 @@ public class NhanViendal {
     }
 
     public NhanVienDTO getNhanVienTheoMa(String maNhanVien) {
-        String sql = "SELECT * FROM NhanVien WHERE maNhanVien = ?";
+        String sql = "SELECT * FROM NhanVien WHERE MANV = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, maNhanVien);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new NhanVienDTO(
-                            rs.getString("maNhanVien"),
+                            rs.getString("MANV"),
                             rs.getString("hoTen"),
                             rs.getString("cccd"),
                             rs.getString("sdt"),
-                            rs.getString("viTriCongViec"),
+                            rs.getString("MAVT"),
                             rs.getString("maSoThue")
                     );
                 }
@@ -116,11 +116,11 @@ public class NhanViendal {
 
             while (rs.next()) {
                 NhanVienDTO nv = new NhanVienDTO(
-                        rs.getString("maNhanVien"),
+                        rs.getString("MANV"),
                         rs.getString("hoTen"),
                         rs.getString("cccd"),
                         rs.getString("sdt"),
-                        rs.getString("viTriCongViec"),
+                        rs.getString("MAVT"),
                         rs.getString("maSoThue")
                 );
                 danhSachNV.add(nv);
@@ -143,11 +143,11 @@ public class NhanViendal {
 
             while (rs.next()) {
                 NhanVienDTO nv = new NhanVienDTO(
-                        rs.getString("maNhanVien"),
+                        rs.getString("MANV"),
                         rs.getString("hoTen"),
                         rs.getString("cccd"),
                         rs.getString("sdt"),
-                        rs.getString("viTriCongViec"),
+                        rs.getString("MAVT"),
                         rs.getString("maSoThue")
                 );
                 danhSachNV.add(nv);

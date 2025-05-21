@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 public class TTCTkh extends BaseFrame {
 	private JLabel lblInfo;
 	private KhachHangBLL bllKhachhang = new KhachHangBLL();
-	private JTextArea txtHoTen, txtMaKH, txtDiemTL, txtSoLanMua, txtMaLoaiKH;
+	private JTextArea txtHoTen, txtMaKH, txtDiemTL, txtLoaiKH, txtSDT;
 
 	public TTCTkh() {
 		super("Thông tin khách hàng");	
@@ -89,19 +89,19 @@ public class TTCTkh extends BaseFrame {
 	        txtHoTen.setOpaque(false);  
 	        add(txtHoTen);
 
-	        // số lần mua
+	        // Số điện thoại
 	        JLabel lblSoLanMua = new JLabel("Số lần mua:");
 	        lblSoLanMua.setBounds(270, 220, 150, 30);
 	        add(lblSoLanMua);
-	        txtSoLanMua = new JTextArea();
-	        txtSoLanMua.setBounds(450, 220, 200, 30);
-	        txtSoLanMua.setLineWrap(true);
-	        txtSoLanMua.setWrapStyleWord(true);
-	        txtSoLanMua.setEditable(false);
-	        txtSoLanMua.setFont(new Font("Arial", Font.BOLD, 20));
-	        txtSoLanMua.setForeground(Color.decode("#641A1F"));
-	        txtSoLanMua.setOpaque(false);  
-	        add(txtSoLanMua);
+	        txtSDT = new JTextArea();
+	        txtSDT.setBounds(450, 220, 200, 30);
+	        txtSDT.setLineWrap(true);
+	        txtSDT.setWrapStyleWord(true);
+	        txtSDT.setEditable(false);
+	        txtSDT.setFont(new Font("Arial", Font.BOLD, 20));
+	        txtSDT.setForeground(Color.decode("#641A1F"));
+	        txtSDT.setOpaque(false);
+	        add(txtSDT);
 	        // điểm tích lũy
 	        JLabel lblDiemTL = new JLabel("Điểm tích lũy:");
 	        lblDiemTL.setBounds(270, 270, 150, 30);
@@ -119,15 +119,15 @@ public class TTCTkh extends BaseFrame {
 	        JLabel lblMaLoaiKH = new JLabel("Mã loại khách hàng:");
 	        lblMaLoaiKH.setBounds(270, 320, 150, 30);
 	        add(lblMaLoaiKH);
-	        txtMaLoaiKH = new JTextArea();
-	        txtMaLoaiKH.setBounds(450, 320, 200, 30);
-	        txtMaLoaiKH.setLineWrap(true);
-	        txtMaLoaiKH.setWrapStyleWord(true);
-	        txtMaLoaiKH.setEditable(false);
-	        txtMaLoaiKH.setFont(new Font("Arial", Font.BOLD, 20));
-	        txtMaLoaiKH.setForeground(Color.decode("#641A1F"));
-	        txtMaLoaiKH.setOpaque(false);  
-	        add(txtMaLoaiKH);
+	        txtLoaiKH = new JTextArea();
+	        txtLoaiKH.setBounds(450, 320, 200, 30);
+	        txtLoaiKH.setLineWrap(true);
+	        txtLoaiKH.setWrapStyleWord(true);
+	        txtLoaiKH.setEditable(false);
+	        txtLoaiKH.setFont(new Font("Arial", Font.BOLD, 20));
+	        txtLoaiKH.setForeground(Color.decode("#641A1F"));
+	        txtLoaiKH.setOpaque(false);
+	        add(txtLoaiKH);
 	        // nút xóa
 	        JButton btnXoa = new JButton("Xóa");
 	        btnXoa.setBounds(700, 520, 100, 40);
@@ -181,12 +181,12 @@ public class TTCTkh extends BaseFrame {
 
 	   
 
-	    public void setThongTin(String tenKH, String maKH, int SLM, Double DTL, String maLKH) {
+	    public void setThongTin(String tenKH, String maKH, Double DTL, String maLKH, String sdt) {
 	txtHoTen.setText(tenKH);
 	txtMaKH.setText(maKH);
-	txtSoLanMua.setText(String.valueOf(SLM));
 	txtDiemTL.setText(String.valueOf(DTL));
-	txtMaLoaiKH.setText(maLKH);
+	txtLoaiKH.setText(maLKH);
+	txtSDT.setText(sdt);
 
 	revalidate();
 	repaint();
