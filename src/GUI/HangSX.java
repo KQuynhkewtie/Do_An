@@ -24,54 +24,51 @@ public class HangSX extends BaseFrame {
 	 private JTextField searchhsxField;
 
     public HangSX() {
-    	super("HangSX");
-    	initialize();
-    	}
-
+        super("HangSX");
+        initialize();
+    }
 
     @Override
-    	protected void initUniqueComponents() {
-    		 for (JButton btn : menuButtons) {
-    	            if (btn.getText().equals("Hãng sản xuất")) {
-    	                btn.setBackground(Color.decode("#EF5D7A")); 
-    	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-    	            }
-    	        }
-    	        
-    	        // Các nút khác vẫn giữ màu mặc định
-    	        for (JButton btn : menuButtons) {
-    	            if (!btn.getText().equals("Hãng sản xuất")) {
-    	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-    	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-    	            }
-    	        }
-        
-            JLabel lblSanPham = new JLabel("Hãng sản xuất");
-            lblSanPham.setFont(new Font("Arial", Font.BOLD, 20));
-            lblSanPham.setBounds(270, 70, 200, 30);
-            add(lblSanPham);
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Hãng sản xuất")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Hãng sản xuất")) {
+                btn.setBackground(Color.decode("#641A1F"));
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
 
-            
+        JLabel lblSanPham = new JLabel("Hãng sản xuất");
+        lblSanPham.setFont(new Font("Arial", Font.BOLD, 20));
+        lblSanPham.setBounds(270, 70, 200, 30);
+        add(lblSanPham);
+
+
         searchhsxField = new JTextField("Tìm kiếm hãng sản xuất");
         searchhsxField.setBounds(270, 110, 300, 35);
         add( searchhsxField);
 
-        // Thêm sự kiện focus
+
         searchhsxField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
                 if (searchhsxField.getText().equals("Tìm kiếm hãng sản xuất")) {
-                	searchhsxField.setText("");
-                	searchhsxField.setForeground(Color.BLACK);
+                    searchhsxField.setText("");
+                    searchhsxField.setForeground(Color.BLACK);
                 }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 if (searchhsxField.getText().trim().isEmpty()) {
-                	searchhsxField.setText("Tìm kiếm hãng sản xuất");
-                	searchhsxField.setForeground(Color.GRAY);
-                	loadHSX();
+                    searchhsxField.setText("Tìm kiếm hãng sản xuất");
+                    searchhsxField.setForeground(Color.GRAY);
+                    loadHSX();
                 }
             }
         });
@@ -80,14 +77,13 @@ public class HangSX extends BaseFrame {
             public void keyReleased(KeyEvent e) {
                 String keyword = searchhsxField.getText().trim();
                 if (keyword.isEmpty()) {
-                    loadHSX(); // Tự động hiển thị lại danh sách sản phẩm khi ô tìm kiếm trống
+                    loadHSX();
                 } else {
-                    searchHSX(); // Tiến hành tìm kiếm nếu có từ khóa
+                    searchHSX();
                 }
             }
         });
 
-        
 
         JButton btnThemHSX = new JButton("+ Thêm hãng sản xuất");
         btnThemHSX.setBounds(820, 110, 170, 30);
@@ -99,14 +95,18 @@ public class HangSX extends BaseFrame {
         String[] columnNames = { "Mã hãng sản xuất", "Tên hãng sản xuất", "Mã số thuế", "Địa chỉ", "Số điện thoại" };
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 180, 720, 400);
+        scrollPane.setBounds(270, 150, 800, 500);
         add(scrollPane);
-        
 
+        addExceltButton(table);
         loadHSX();
 
-        // chuyển sang giao diện thêm hãng sản xuất
+
         btnThemHSX.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -125,7 +125,7 @@ public class HangSX extends BaseFrame {
                         if (hsx != null) {
                             dispose();
                             TTCTHSX cthsx = new TTCTHSX();
-                            cthsx.setThongTin(hsx.getMaHSX(), hsx.getTenHSX(), hsx.getMaSoThue(), hsx.getDiaChi(), hsx.getSdt());
+                            cthsx.setThongTin(hsx.getMaHSX(), hsx.getTenHSX(), hsx.getMaSoThue(), hsx.getDiaChi(), hsx.getSdt(), hsx.getTrangThai());
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy hãng sản xuất!");
                         }
@@ -135,21 +135,19 @@ public class HangSX extends BaseFrame {
         });
 
         setVisible(true);
-
-        //addExceltButton();
     }
     private void loadHSX() {
-        model.setRowCount(0); // Xóa tất cả các dòng trong bảng
+        model.setRowCount(0);
         List<HangSanXuatDTO> list = bllhsx.getAllHangSanXuat();
-        
+
         for (HangSanXuatDTO hsx : list) {
-            
+
             model.addRow(new Object[]{hsx.getMaHSX(), hsx.getTenHSX(), hsx.getMaSoThue(), hsx.getDiaChi(), hsx.getSdt()});
         }
     }
 
     private void searchHSX() {
-    	String keyword = searchhsxField.getText().trim();// Lấy từ khóa tìm kiếm từ ô nhập liệu
+        String keyword = searchhsxField.getText().trim();
         if (keyword.equals("Tìm") || keyword.isEmpty()) {
             loadHSX();
             return;
@@ -157,16 +155,11 @@ public class HangSX extends BaseFrame {
 
         model.setRowCount(0);
         List<HangSanXuatDTO> list = bllhsx.getHSX(keyword);
-        
+
         for (HangSanXuatDTO hsx : list) {
             model.addRow(new Object[]{hsx.getMaHSX(), hsx.getTenHSX(), hsx.getMaSoThue(), hsx.getDiaChi(), hsx.getSdt()});
         }
     }
-//
-//    @Override
-//    protected void addExceltButton() {
-//        super.addExceltButton();
-//    }
 
     public static void main(String[] args) {
         new HangSX();

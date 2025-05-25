@@ -35,7 +35,6 @@ public class LoaiSP extends BaseFrame {
             }
         }
 
-        // Các nút khác vẫn giữ màu mặc định
         for (JButton btn : menuButtons) {
             if (!btn.getText().equals("Loại sản phẩm")) {
                 btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
@@ -53,7 +52,7 @@ public class LoaiSP extends BaseFrame {
         searchlspField.setBounds(270, 110, 300, 35);
         add(searchlspField);
 
-        // Thêm sự kiện focus
+
         searchlspField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -78,9 +77,9 @@ public class LoaiSP extends BaseFrame {
             public void keyReleased(KeyEvent e) {
                 String keyword = searchlspField.getText().trim();
                 if (keyword.isEmpty()) {
-                    loadLSP(); // Tự động hiển thị lại danh sách sản phẩm khi ô tìm kiếm trống
+                    loadLSP();
                 } else {
-                    searchLSP(); // Tiến hành tìm kiếm nếu có từ khóa
+                    searchLSP();
                 }
             }
         });
@@ -93,17 +92,21 @@ public class LoaiSP extends BaseFrame {
         add(btnThemLSP);
 
         // Table
-        String[] columnNames = {"Tên loại sản phẩm", "Mã loại sản phẩm"};
+        String[] columnNames = {"Mã loại sản phẩm", "Tên loại sản phẩm"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 180, 720, 400);
+        scrollPane.setBounds(270, 150, 800, 500);
         add(scrollPane);
 
         addExceltButton(table);
         loadLSP();
 
-        //chuyển sang giao diện thêm loại sản phẩm
+
         btnThemLSP.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,12 +120,12 @@ public class LoaiSP extends BaseFrame {
                 if (e.getClickCount() == 1) {
                     int row = table.getSelectedRow();
                     if (row >= 0) {
-                        String maLSP = table.getValueAt(row, 1).toString();
+                        String maLSP = table.getValueAt(row, 0).toString();
                         LoaiSPDTO lsp = bllloaisp.getLSPById(maLSP);
                         if (lsp != null) {
                             dispose();
                             TTCTloaisp ctlsp = new TTCTloaisp();
-                            ctlsp.setThongTin(lsp.getTenLSP(), lsp.getMaLSP());
+                            ctlsp.setThongTin( lsp.getMaLSP(),lsp.getTenLSP(), lsp.getTrangThai());
 
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy loại sản phẩm!");
@@ -135,15 +138,15 @@ public class LoaiSP extends BaseFrame {
     }
 
     private void loadLSP() {
-        model.setRowCount(0); // Xóa tất cả các dòng trong bảng
-        List<LoaiSPDTO> list = bllloaisp.layDSLSP();
+        model.setRowCount(0);
+        List<LoaiSPDTO> list = bllloaisp.getAllLSP();
         for (LoaiSPDTO lsp : list) {
-            model.addRow(new Object[]{lsp.getTenLSP(), lsp.getMaLSP()});
+            model.addRow(new Object[]{lsp.getMaLSP(),lsp.getTenLSP()});
         }
     }
 
     private void searchLSP() {
-        String keyword = searchlspField.getText().trim(); // Lấy từ khóa tìm kiếm từ ô nhập liệu
+        String keyword = searchlspField.getText().trim();
         if (keyword.equals("Tìm") || keyword.isEmpty()) {
             loadLSP();
             return;
@@ -153,10 +156,9 @@ public class LoaiSP extends BaseFrame {
         List<LoaiSPDTO> list = bllloaisp.getLSP(keyword);
 
         for (LoaiSPDTO lsp : list) {
-            model.addRow(new Object[]{lsp.getTenLSP(), lsp.getMaLSP()});
+            model.addRow(new Object[]{lsp.getMaLSP(),lsp.getTenLSP() });
         }
-//        System.out.println("Từ khóa tìm kiếm: " + keyword);
-//        System.out.println("Số loại sản phẩm tìm thấy: " + list.size());
+
     }
 
     public static void main(String[] args) {

@@ -143,8 +143,10 @@ public class ThemHD extends BaseFrame {
             }
         };
         table = new JTable(tableModel);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Thiết lập renderer cho các cột
         table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {

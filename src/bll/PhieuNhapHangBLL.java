@@ -46,14 +46,14 @@ public class PhieuNhapHangBLL {
                 }
 
                 // Cập nhật số lượng tồn kho
-                SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
-                if (sp != null) {
-                    sp.setsoluong(sp.getsoluong() + ct.getSoLuongNhap());
-                    if (!spDAL.updateSanPham(sp)) {
-                        conn.rollback();
-                        return false;
-                    }
-                }
+//                SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
+//                if (sp != null) {
+//                    sp.setsoluong(sp.getsoluong() + ct.getSoLuongNhap());
+//                    if (!spDAL.updateSanPham(sp)) {
+//                        conn.rollback();
+//                        return false;
+//                    }
+//                }
             }
 
             // 3. Cập nhật tổng tiền
@@ -84,26 +84,26 @@ public class PhieuNhapHangBLL {
             conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Lấy danh sách chi tiết trước khi xóa
-            List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = pnhDAL.layChiTietPhieuNhapHang(maPNH, conn);
-
-            // 2. Xóa chi tiết và cập nhật số lượng tồn
-            for (ChiTietPhieuNhapHangDTO ct : danhSachChiTiet) {
-                // Trừ số lượng tồn kho trước khi xóa chi tiết
-                SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
-                if (sp != null) {
-                    sp.setsoluong(sp.getsoluong() - ct.getSoLuongNhap());
-                    if (!spDAL.updateSanPham(sp)) {
-                        conn.rollback();
-                        return false;
-                    }
-                }
-
-                if (!pnhDAL.xoaChiTietPhieuNhapHang(ct.getMaPNH(), ct.getMaSP(), conn)) {
-                    conn.rollback();
-                    return false;
-                }
-            }
+//            // 1. Lấy danh sách chi tiết trước khi xóa
+//            List<ChiTietPhieuNhapHangDTO> danhSachChiTiet = pnhDAL.layChiTietPhieuNhapHang(maPNH, conn);
+//
+//            // 2. Xóa chi tiết và cập nhật số lượng tồn
+//            for (ChiTietPhieuNhapHangDTO ct : danhSachChiTiet) {
+//                // Trừ số lượng tồn kho trước khi xóa chi tiết
+////                SanPhamDTO sp = spDAL.laySanPhamTheoMa(ct.getMaSP(), conn);
+////                if (sp != null) {
+////                    sp.setsoluong(sp.getsoluong() - ct.getSoLuongNhap());
+////                    if (!spDAL.updateSanPham(sp)) {
+////                        conn.rollback();
+////                        return false;
+////                    }
+////                }
+//
+//                if (!pnhDAL.xoaChiTietPhieuNhapHang(ct.getMaPNH(), ct.getMaSP(), conn)) {
+//                    conn.rollback();
+//                    return false;
+//                }
+//            }
 
             // 3. Xóa phiếu nhập chính
             if (!pnhDAL.xoaPhieuNhapHang(maPNH, conn)) {
@@ -153,14 +153,14 @@ public class PhieuNhapHangBLL {
             for (ChiTietPhieuNhapHangDTO ctCu : chiTietCu) {
                 if (!chiTietMoi.stream().anyMatch(ct -> ct.getMaSP().equals(ctCu.getMaSP()))) {
                     // Trừ số lượng tồn kho khi xóa chi tiết
-                    SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctCu.getMaSP(), conn);
-                    if (sp != null) {
-                        sp.setsoluong(sp.getsoluong() - ctCu.getSoLuongNhap());
-                        if (!spDAL.updateSanPham(sp)){
-                            conn.rollback();
-                            return false;
-                        }
-                    }
+//                    SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctCu.getMaSP(), conn);
+//                    if (sp != null) {
+//                        sp.setsoluong(sp.getsoluong() - ctCu.getSoLuongNhap());
+//                        if (!spDAL.updateSanPham(sp)){
+//                            conn.rollback();
+//                            return false;
+//                        }
+//                    }
 
                     if (!pnhDAL.xoaChiTietPhieuNhapHang(ctCu.getMaPNH(), ctCu.getMaSP(), conn)) {
                         conn.rollback();
@@ -179,17 +179,17 @@ public class PhieuNhapHangBLL {
                             .filter(ct -> ct.getMaSP().equals(ctMoi.getMaSP()))
                             .findFirst().get();
 
-                    int soLuongThayDoi = ctMoi.getSoLuongNhap() - ctCu.getSoLuongNhap();
-                    if (soLuongThayDoi != 0) {
-                        SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
-                        if (sp != null) {
-                            sp.setsoluong(sp.getsoluong() + soLuongThayDoi);
-                            if (!spDAL.updateSanPham(sp)) {
-                                conn.rollback();
-                                return false;
-                            }
-                        }
-                    }
+//                    int soLuongThayDoi = ctMoi.getSoLuongNhap() - ctCu.getSoLuongNhap();
+//                    if (soLuongThayDoi != 0) {
+//                        SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
+//                        if (sp != null) {
+//                            sp.setsoluong(sp.getsoluong() + soLuongThayDoi);
+//                            if (!spDAL.updateSanPham(sp)) {
+//                                conn.rollback();
+//                                return false;
+//                            }
+//                        }
+//                    }
 
                     if (!pnhDAL.capNhatChiTietPhieuNhapHang(ctMoi, conn)) {
                         conn.rollback();
@@ -202,14 +202,14 @@ public class PhieuNhapHangBLL {
                         return false;
                     }
 
-                    SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
-                    if (sp != null) {
-                        sp.setsoluong(sp.getsoluong() + ctMoi.getSoLuongNhap());
-                        if (!spDAL.updateSanPham(sp)) {
-                            conn.rollback();
-                            return false;
-                        }
-                    }
+//                    SanPhamDTO sp = spDAL.laySanPhamTheoMa(ctMoi.getMaSP(), conn);
+//                    if (sp != null) {
+//                        sp.setsoluong(sp.getsoluong() + ctMoi.getSoLuongNhap());
+//                        if (!spDAL.updateSanPham(sp)) {
+//                            conn.rollback();
+//                            return false;
+//                        }
+//                    }
                 }
             }
 

@@ -9,7 +9,7 @@ public class KhachHangBLL {
     private khachhangdal khDal = new khachhangdal();
 
     // Lấy danh sách khách hàng
-    public ArrayList<KhachHangDTO> layDSKhachHang() {
+    public ArrayList<KhachHangDTO> getAllKhachHang() {
         return khDal.layDSKhachHang();
     }
 
@@ -38,8 +38,4 @@ public class KhachHangBLL {
         return khDal.deleteKhachHangById(maKH);
     }
 
-    // Xóa khách hàng theo tên
-    public boolean deleteKhachHangByName(String tenKH) {
-        return khDal.deleteKhachHangByName(tenKH);
-    }
 }

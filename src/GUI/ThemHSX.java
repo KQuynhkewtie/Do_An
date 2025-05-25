@@ -5,6 +5,8 @@ import javax.swing.*;
 
 import dal.hangsanxuatdal;
 import dto.HangSanXuatDTO;
+import dto.currentuser;
+import bll.HangSanXuatBLL;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,28 +17,29 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class ThemHSX extends BaseFrame {
-	private hangsanxuatdal hsxDAL = new hangsanxuatdal();
-    public ThemHSX() {    	
-    	super("Cập nhật thông tin hãng sản xuất");
-    	initialize();
-    	} 
+    private HangSanXuatBLL hsxBLL = new HangSanXuatBLL();
+    private JRadioButton rbSD, rbNSD;
+    private ButtonGroup groupTrangThai;
+    public ThemHSX() {
+        super("Cập nhật thông tin hãng sản xuất");
+        initialize();
+    }
 
     @Override
-   	protected void initUniqueComponents() {
-   		 for (JButton btn : menuButtons) {
-   	            if (btn.getText().equals("Hãng sản xuất")) {
-   	                btn.setBackground(Color.decode("#EF5D7A")); 
-   	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-   	            }
-   	        }
-   	        
-   	        // Các nút khác vẫn giữ màu mặc định
-   	        for (JButton btn : menuButtons) {
-   	            if (!btn.getText().equals("Hãng sản xuất")) {
-   	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-   	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-   	            }
-   	        }
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Hãng sản xuất")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Hãng sản xuất")) {
+                btn.setBackground(Color.decode("#641A1F"));
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
         JLabel lblLoaiSanPhamLink = new JLabel("<html><u>Hãng sản xuất</u></html>");
         lblLoaiSanPhamLink.setFont(new Font("Arial", Font.BOLD, 20));
         lblLoaiSanPhamLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -69,7 +72,7 @@ public class ThemHSX extends BaseFrame {
         JTextField txtMaHSX = new JTextField();
         txtMaHSX.setBounds(270, 150, 300, 30);
         add(txtMaHSX);
-        
+
         JLabel lbldiachi = new JLabel("Địa chỉ:");
         lbldiachi.setBounds(700, 200, 150, 25);
         add(lbldiachi);
@@ -92,6 +95,21 @@ public class ThemHSX extends BaseFrame {
         add(txtsdt);
 
 
+        JLabel lblTrangThai = new JLabel("Trạng thái:");
+        lblTrangThai.setBounds(270, 280, 150, 25);
+        add(lblTrangThai);
+
+        rbSD = new JRadioButton("Còn sử dụng");
+        rbSD.setBounds(270, 310, 150, 25);
+        add(rbSD);
+
+        rbNSD = new JRadioButton("Ngưng sử dụng");
+        rbNSD.setBounds(270, 340, 150, 25);
+        add(rbNSD);
+
+        groupTrangThai = new ButtonGroup();
+        groupTrangThai.add(rbSD);
+        groupTrangThai.add(rbNSD);
 
         // Nút Lưu
         JButton btnLuu = new JButton("Lưu");
@@ -103,27 +121,53 @@ public class ThemHSX extends BaseFrame {
         btnLuu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!currentuser.coQuyen("Thêm hãng sản xuất")) {
+
+                    JOptionPane.showMessageDialog(null, "Bạn không có quyền thêm!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 try {
-                	 String maHSX = txtMaHSX.getText().trim();
-                     String tenHSX = txttenHSX.getText().trim();
-                     String MST = txtMaSoThue.getText().trim();
-                     String DC = txtdiachi.getText().trim();
-                     String SDT = txtsdt.getText().trim();
-                   
-                   
+                    String maHSX = txtMaHSX.getText().trim();
+                    String tenHSX = txttenHSX.getText().trim();
+                    String MST = txtMaSoThue.getText().trim();
+                    String DC = txtdiachi.getText().trim();
+                    String SDT = txtsdt.getText().trim();
+                    if (maHSX.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập mã hãng sản xuất!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (tenHSX.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập tên hãng sản xuất!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (MST.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập mã số thuế!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (DC.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập địa chỉ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (SDT.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập số điện thoại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    int trangthai;
+                    if (rbSD.isSelected()) {
+                        trangthai = 1;
+                    } else if (rbNSD.isSelected()) {
+                        trangthai = 0;
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn trạng thái!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    HangSanXuatDTO hsx = new HangSanXuatDTO(maHSX, tenHSX, MST, DC, SDT, trangthai);
 
-                    // Tạo đối tượng sản phẩm
-                    HangSanXuatDTO hsx = new HangSanXuatDTO(maHSX, tenHSX, MST, DC, SDT);
-                    
-                    System.out.println("Mã hãng sản xuất lấy từ giao diện: [" + maHSX + "]");
-
-                    // Gọi phương thức thêm sản phẩm vào DB
-                    boolean result = hsxDAL.addHangSanXuat(hsx);
-
-                    // Hiển thị thông báo
+                    boolean result = hsxBLL.insertHangSanXuat(hsx);
                     if (result) {
                         JOptionPane.showMessageDialog(null, "Thêm hãng sản xuất thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                       
+                        dispose();
+                        new HangSX();
                     } else {
                         JOptionPane.showMessageDialog(null, "Thêm hãng sản xuất thất bại! Kiểm tra dữ liệu." , "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
@@ -143,12 +187,10 @@ public class ThemHSX extends BaseFrame {
                 public void keyPressed(KeyEvent e) {
                     int key = e.getKeyCode();
                     if (key == KeyEvent.VK_DOWN) {
-                        // Mũi tên xuống - chuyển đến trường nhập liệu tiếp theo
                         if (currentIndex < textFields.length - 1) {
                             textFields[currentIndex + 1].requestFocus();
                         }
                     } else if (key == KeyEvent.VK_UP) {
-                        // Mũi tên lên - chuyển đến trường nhập liệu trước đó
                         if (currentIndex > 0) {
                             textFields[currentIndex - 1].requestFocus();
                         }

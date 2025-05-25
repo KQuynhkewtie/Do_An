@@ -83,8 +83,8 @@ public class HoaDon extends BaseFrame {
         // Nút tìm kiếm
         JButton btnSearch = new JButton("Tìm kiếm");
         btnSearch.setBounds(690, 110, 100, 35);
-        btnSearch.setBackground(Color.decode("#4CAF50"));
         btnSearch.setForeground(Color.WHITE);
+        btnSearch.setBackground(Color.decode("#F5A623"));
         btnSearch.addActionListener(e -> performSearch());
         add(btnSearch);
 
@@ -203,7 +203,10 @@ public class HoaDon extends BaseFrame {
                 return c;
             }
         };
-
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         table.addMouseListener(new MouseAdapter() {
@@ -220,7 +223,7 @@ public class HoaDon extends BaseFrame {
         });
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 280, 800, 360);
+        scrollPane.setBounds(270, 300, 800, 360);
         add(scrollPane);
     }
 

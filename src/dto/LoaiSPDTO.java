@@ -4,17 +4,21 @@ public class LoaiSPDTO {
 
     private String maLSP;
     private String tenLSP;
+    private int trangThai;
 
     // Constructor không tham số
-    public LoaiSPDTO() {}
-
-    // Constructor đầy đủ tham số
-    public LoaiSPDTO(String maLSP, String tenLSP) {
-        this.maLSP = maLSP;
-        this.tenLSP = tenLSP;
+    public LoaiSPDTO() {
     }
 
-    // Getter & Setter
+    // Constructor đầy đủ tham số
+    public LoaiSPDTO(String maLSP, String tenLSP, int trangThai) {
+        this.maLSP = maLSP;
+        this.tenLSP = tenLSP;
+        this.trangThai = trangThai;
+
+    }
+
+
     public String getMaLSP() {
         return maLSP;
     }
@@ -31,8 +35,12 @@ public class LoaiSPDTO {
         this.tenLSP = tenLSP;
     }
 
-    @Override
-    public String toString() {
-        return "Mã loại SP: " + maLSP + " | Tên loại SP: " + tenLSP;
+    public int getTrangThai() {
+        return trangThai;
     }
+
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
+    }
+
 }

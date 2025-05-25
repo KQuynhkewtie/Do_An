@@ -27,11 +27,6 @@ public class HoaDonBLL {
         }
     }
 
-    // Thêm phương thức đóng kết nối
-    public void closeConnection() {
-        DatabaseHelper.closeConnection(this.connection);
-    }
-
     // Các phương thức tính doanh thu (giữ nguyên từ code cũ)
     public double tinhDoanhThuTheoNgay(Date ngay) {
         return hdDAL.getDoanhThuTheoNgay(ngay);
@@ -54,9 +49,6 @@ public class HoaDonBLL {
         return hdDAL.layDanhSachHoaDon();
     }
 
-    public boolean themHoaDon(HoaDonDTO hd) {
-        return hdDAL.themHoaDon(hd);
-    }
 
     // Cập nhật phương thức tìm kiếm để hỗ trợ lọc trạng thái
     public List<HoaDonDTO> timKiemHoaDon(String keyword, String fromDate, String toDate,
@@ -66,21 +58,6 @@ public class HoaDonBLL {
 
     public List<ChiTietHoaDonDTO> layChiTietHoaDon(String maHoaDon) {
         return hdDAL.layChiTietHoaDon(maHoaDon);
-    }
-
-    public String taoMaHoaDonMoi() {
-        List<HoaDonDTO> danhSach = hdDAL.layDanhSachHoaDon();
-        if (danhSach.isEmpty()) {
-            return "HD000001";
-        }
-
-        String maCuoi = danhSach.get(danhSach.size() - 1).getMaHoaDon();
-        int so = Integer.parseInt(maCuoi.substring(2)) + 1;
-        return String.format("HD%06d", so);
-    }
-
-    public boolean capNhatTongTienHoaDon(String maHoaDon) {
-        return hdDAL.capNhatTongTienHoaDon(maHoaDon);
     }
 
     public HoaDonDTO layHoaDonTheoMa(String maHoaDon) {
@@ -96,9 +73,6 @@ public class HoaDonBLL {
         return false;
     }
 
-    public String layTenSanPham(String maSanPham) {
-        return hdDAL.layTenSanPham(maSanPham);
-    }
 
     public Map<String, String> layDanhSachTenSanPham(List<String> danhSachMaSP) {
         return hdDAL.layDanhSachTenSanPham(danhSachMaSP);
@@ -107,41 +81,24 @@ public class HoaDonBLL {
     // Thêm các phương thức mới
     public boolean themHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
         try {
-            System.out.println("Bắt đầu thêm hóa đơn " + hd.getMaHoaDon());
             // Bắt đầu transaction
             connection.setAutoCommit(false);
 
             // Kiểm tra số lượng tồn kho
-            System.out.println("Kiểm tra tồn kho...");
-
-            if (!kiemTraSoLuongTonKho(danhSachChiTiet)) {
-                System.out.println("Lỗi: Không đủ tồn kho");
-
-                JOptionPane.showMessageDialog(null, "Một số sản phẩm không đủ số lượng tồn kho!");
-                connection.rollback();
-                return false;
-            }
 
             // Tính tổng tiền
             double tongTien = danhSachChiTiet.stream()
                     .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
                     .sum();
-            System.out.println("Tổng tiền: " + tongTien);
             hd.setThanhTien(tongTien);
 
             // Thêm hóa đơn và chi tiết
-            System.out.println("Thêm hóa đơn vào DAL...");
-
             boolean result = hdDAL.themHoaDonVoiChiTiet(hd, danhSachChiTiet);
 
             if (result) {
-                System.out.println("Commit transaction...");
-
                 connection.commit();
                 return true;
             } else {
-                System.out.println("Rollback do thêm hóa đơn thất bại");
-
                 connection.rollback();
                 return false;
             }
@@ -175,28 +132,6 @@ public class HoaDonBLL {
         }
     }
 
-    private boolean kiemTraSoLuongTonKho(List<ChiTietHoaDonDTO> danhSachChiTiet) {
-        SanPhamDAL spDAL = new SanPhamDAL();
-        try {
-            for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
-                int tonKho = spDAL.getSoLuongTon(ct.getMaSanPham());
-                System.out.println("Sản phẩm " + ct.getMaSanPham() +
-                        " - Yêu cầu: " + ct.getSoLuong() +
-                        " - Tồn kho: " + tonKho);
-                if (tonKho < ct.getSoLuong()) {
-                    System.out.println("Không đủ tồn kho cho sản phẩm " + ct.getMaSanPham());
-
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            System.err.println("Lỗi khi kiểm tra tồn kho: " + e.getMessage());
-
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public boolean kiemTraMaHDTonTai(String maHD) {
         return hdDAL.kiemTraMaHDTonTai(maHD);

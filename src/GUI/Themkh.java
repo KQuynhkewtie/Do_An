@@ -5,6 +5,7 @@ import javax.swing.*;
 
 import dal.khachhangdal;
 import dto.KhachHangDTO;
+import bll.KhachHangBLL;
 
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -15,26 +16,26 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class Themkh extends BaseFrame {
-	private khachhangdal khDAL= new khachhangdal();
+    private KhachHangBLL khBLL= new KhachHangBLL();
     public Themkh() {super("Cập nhật thông tin khách hàng");
-	initialize();
-	} 
+        initialize();
+    }
     @Override
-   	protected void initUniqueComponents() {
-   		 for (JButton btn : menuButtons) {
-   	            if (btn.getText().equals("Khách hàng")) {
-   	                btn.setBackground(Color.decode("#EF5D7A")); 
-   	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-   	            }
-   	        }
-   	        
-   	        // Các nút khác vẫn giữ màu mặc định
-   	        for (JButton btn : menuButtons) {
-   	            if (!btn.getText().equals("Khách hàng")) {
-   	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-   	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-   	            }
-   	        }
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Khách hàng")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Khách hàng")) {
+                btn.setBackground(Color.decode("#641A1F"));
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
         JLabel lblSanPhamLink = new JLabel("<html><u>Khách Hàng</u></html>");
         lblSanPhamLink.setFont(new Font("Arial", Font.BOLD, 20));
         lblSanPhamLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -61,35 +62,43 @@ public class Themkh extends BaseFrame {
         JTextField txtMaKH = new JTextField();
         txtMaKH.setBounds(450, 120, 200, 30);
         add(txtMaKH);
-        //họ tên 
+        //họ tên
         JLabel lblHoTen = new JLabel("Họ tên:");
         lblHoTen.setBounds(270, 170, 150, 30);
         add(lblHoTen);
         JTextField txtHoTen = new JTextField();
         txtHoTen.setBounds(450, 170, 200, 30);
         add(txtHoTen);
-        //số đt
-        JLabel lblSoLanMua = new JLabel("Số điện thoại:");
-        lblSoLanMua.setBounds(270, 220, 150, 30);
-        add(lblSoLanMua);
-        JTextField txtSDT = new JTextField();
-        txtSDT.setBounds(450, 220, 200, 30);
-        add(txtSDT);
+        //số lần mua
+        JLabel lblsdt = new JLabel("Số diện thoại:");
+        lblsdt.setBounds(270, 220, 150, 30);
+        add(lblsdt);
+        JTextField txtsdt = new JTextField();
+        txtsdt.setBounds(450, 220, 200, 30);
+        add(txtsdt);
         //điểm tích lũy
         JLabel lblDiemTL = new JLabel("Điểm tích lũy:");
         lblDiemTL.setBounds(270, 270, 150, 30);
         add(lblDiemTL);
-        JTextField txtDiemTL = new JTextField();
+        JTextField txtDiemTL = new JTextField("0.0");
         txtDiemTL.setBounds(450, 270, 200, 30);
+        txtDiemTL.setEditable(false);
+        txtDiemTL.setFocusable(false);
+        txtDiemTL.setBackground(new Color(230, 230, 230));
         add(txtDiemTL);
-        //mã loại khách hàng
-        JLabel lblMaLoaiKH = new JLabel("Mã loại khách hàng:");
-        lblMaLoaiKH.setBounds(270, 320, 150, 30);
-        add(lblMaLoaiKH);
-        JTextField txtMaLoaiKH = new JTextField();
-        txtMaLoaiKH.setBounds(450, 320, 200, 30);
-        add(txtMaLoaiKH);
-        //nút lưu 
+
+        JLabel lblLoaiKH = new JLabel("Loại khách hàng:");
+        lblLoaiKH.setBounds(270, 320, 150, 30);
+        add(lblLoaiKH);
+        JTextField txtLoaiKH = new JTextField("Bình thường");
+        txtLoaiKH.setBounds(450, 320, 200, 30);
+        txtLoaiKH.setEditable(false);
+        txtLoaiKH.setFocusable(false);
+        txtLoaiKH.setBackground(new Color(230, 230, 230));
+        add(txtLoaiKH);
+
+
+        //nút lưu
         JButton btnLuu = new JButton("Lưu");
         btnLuu.setBounds(450, 370, 100, 30);
         btnLuu.setBackground(Color.decode("#F0483E"));
@@ -100,26 +109,30 @@ public class Themkh extends BaseFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                	 String maKH = txtMaKH.getText().trim();
-                     String tenKH = txtHoTen.getText().trim();
-                     double DTL = Double.parseDouble(txtDiemTL.getText().trim());
-                     String Loai = txtMaLoaiKH.getText().trim();
-                     String SDT = txtSDT.getText().trim();
+                    String maKH = txtMaKH.getText().trim();
+                    String tenKH = txtHoTen.getText().trim();
+                    String SDT = txtsdt.getText().trim();
 
+                    if (maKH.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập mã khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if (tenKH.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập tên khách hàng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
 
+                    if (SDT.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập số điện thoại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    KhachHangDTO kh = new KhachHangDTO(maKH, tenKH, SDT);
 
-                    // Tạo đối tượng sản phẩm
-                     KhachHangDTO kh = new KhachHangDTO(maKH, tenKH, DTL, Loai, SDT);
-                    
-                    System.out.println("Mã khách hàng lấy từ giao diện: [" + maKH + "]");
-
-                    // Gọi phương thức thêm sản phẩm vào DB
-                    boolean result = khDAL.insertKhachHang(kh);
-
-                    // Hiển thị thông báo
+                    boolean result = khBLL.insertKhachHang(kh);
                     if (result) {
                         JOptionPane.showMessageDialog(null, "Thêm khách hàng thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                       
+                        dispose();
+                        new KhachHang();
                     } else {
                         JOptionPane.showMessageDialog(null, "Thêm khách hàng thất bại! Kiểm tra dữ liệu." , "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
@@ -130,8 +143,8 @@ public class Themkh extends BaseFrame {
         });
         getRootPane().setDefaultButton(btnLuu);
         setVisible(true);
-        
-        JTextField[] textFields = { txtMaKH,txtHoTen, txtDiemTL, txtMaLoaiKH, txtSDT};
+
+        JTextField[] textFields = { txtMaKH,txtHoTen, txtsdt};
 
         for (int i = 0; i < textFields.length; i++) {
             final int currentIndex = i;
@@ -140,12 +153,12 @@ public class Themkh extends BaseFrame {
                 public void keyPressed(KeyEvent e) {
                     int key = e.getKeyCode();
                     if (key == KeyEvent.VK_DOWN) {
-                        // Mũi tên xuống - chuyển đến trường nhập liệu tiếp theo
+
                         if (currentIndex < textFields.length - 1) {
                             textFields[currentIndex + 1].requestFocus();
                         }
                     } else if (key == KeyEvent.VK_UP) {
-                        // Mũi tên lên - chuyển đến trường nhập liệu trước đó
+
                         if (currentIndex > 0) {
                             textFields[currentIndex - 1].requestFocus();
                         }
@@ -155,6 +168,6 @@ public class Themkh extends BaseFrame {
         }
     }
     public static void main(String[] args) {
-       new Themkh();
+        new Themkh();
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import dto.LoaiSPDTO;
 
 public class loaispdal {
-	public ArrayList<LoaiSPDTO> layDSLSP() {
+	public ArrayList<LoaiSPDTO> getAllLSP() {
 		ArrayList<LoaiSPDTO> ds = new ArrayList<>();
 		String query = "SELECT * FROM LOAISANPHAM";
 
@@ -17,7 +17,8 @@ public class loaispdal {
 			while (rs.next()) {
 				LoaiSPDTO lsp = new LoaiSPDTO(
 						rs.getString("MALSP"),
-						rs.getString("TENLSP")
+						rs.getString("TENLSP"),
+						rs.getInt("TRANGTHAI")
 				);
 				ds.add(lsp);
 			}
@@ -29,7 +30,7 @@ public class loaispdal {
 
 	public LoaiSPDTO getLSPById(String maLSP) {
 		LoaiSPDTO lsp = null;
-		String query = "SELECT * FROM LOAISANPHAM WHERE MALSP = ?";
+		String query = "SELECT * FROM LOAISANPHAM WHERE TRIM(MALSP) = ?";
 
 		try (Connection conn = DatabaseHelper.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -39,7 +40,8 @@ public class loaispdal {
 			if (rs.next()) {
 				lsp = new LoaiSPDTO(
 						rs.getString("MALSP"),
-						rs.getString("TENLSP")
+						rs.getString("TENLSP"),
+						rs.getInt("TRANGTHAI")
 				);
 			}
 		} catch (SQLException e) {
@@ -49,12 +51,14 @@ public class loaispdal {
 	}
 
 	public boolean insertLSP(LoaiSPDTO lsp) {
-		String sql = "INSERT INTO LOAISANPHAM (MALSP, TENLSP) VALUES (?, ?)";
+		String sql = "INSERT INTO LOAISANPHAM (MALSP, TENLSP, TRANGTHAI) VALUES (?, ?, ?)";
 
 		try (Connection conn = DatabaseHelper.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setString(1, lsp.getMaLSP());
 			ps.setString(2, lsp.getTenLSP());
+			ps.setInt(3, lsp.getTrangThai());
+
 			return ps.executeUpdate() > 0;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -64,17 +68,20 @@ public class loaispdal {
 
 	public List<LoaiSPDTO> getLSP(String keyword) {
 		List<LoaiSPDTO> danhSachLSP = new ArrayList<>();
-		String sql = "SELECT * FROM LOAISANPHAM WHERE LOWER(TENLSP) LIKE ?";
+		String sql = "SELECT * FROM LOAISANPHAM WHERE LOWER(TENLSP) LIKE ? OR LOWER(MALSP) LIKE ?";
 
 		try (Connection conn = DatabaseHelper.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setString(1, "%" + keyword.toLowerCase() + "%");
+			ps.setString(2, "%" + keyword+ "%");
+
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
 				LoaiSPDTO lsp = new LoaiSPDTO(
 						rs.getString("MALSP"),
-						rs.getString("TENLSP")
+						rs.getString("TENLSP"),
+						rs.getInt("TRANGTHAI")
 				);
 				danhSachLSP.add(lsp);
 			}
@@ -98,21 +105,14 @@ public class loaispdal {
 	}
 
 	public boolean updateLSP(LoaiSPDTO lsp) {
-		String sql = "UPDATE LOAISANPHAM SET TENLSP=? WHERE TRIM(MALSP) = ?";
+		String sql = "UPDATE LOAISANPHAM SET TENLSP=? ,TRANGTHAI = ?  WHERE TRIM(MALSP) = ?";
 
 		try (Connection conn = DatabaseHelper.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-			System.out.println("Đang cập nhật thông tin loaisanpham : " + lsp);
-			System.out.println("Mã LSP: " + lsp.getMaLSP());
-			System.out.println("1. TENLSP: " + lsp.getTenLSP());
-
 			ps.setString(1, lsp.getTenLSP());
 			ps.setString(2, lsp.getMaLSP().trim());
-
-			System.out.println("Giá trị truyền vào UPDATE:");
-			System.out.println("1. TENLSP: " + lsp.getTenLSP());
-			System.out.println("2. MALSP (WHERE): " + lsp.getMaLSP().trim());
+			ps.setString(3, lsp.getMaLSP().trim());
 
 			int rows = ps.executeUpdate();
 			System.out.println("Rows affected: " + rows);

@@ -10,13 +10,14 @@ public class SanPhamDTO {
 	private String soDangKy;
 	private int soLuong;
 	private double giaBan;
+	private int trangThai;
 
 	// Constructor
 	public SanPhamDTO() {
 	}
 
 	public SanPhamDTO(String maSP, String maHSX, String maLSP, String tenSP, String quyCachDongGoi,
-					  String soDangKy, int soLuong, double giaBan) {
+					  String soDangKy, int soLuong, double giaBan, int trangThai) {
 		this.maSP = maSP;
 		this.maHSX = maHSX;
 		this.maLSP = maLSP;
@@ -25,6 +26,7 @@ public class SanPhamDTO {
 		this.soDangKy = soDangKy;
 		this.soLuong = soLuong;
 		this.giaBan = giaBan;
+		this.trangThai = trangThai;
 	}
 
 	// Getter & Setter
@@ -91,6 +93,14 @@ public class SanPhamDTO {
 
 	public void setGiaBan(double giaBan) {
 		this.giaBan = giaBan;
+	}
+
+	public int getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(int trangThai) {
+		this.trangThai = trangThai;
 	}
 
 }

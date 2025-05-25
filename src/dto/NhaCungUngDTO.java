@@ -8,21 +8,24 @@ public class NhaCungUngDTO {
     private String diaChi;
     private String sdt;
     private String email;
+    private int trangThai;
 
     // Constructor không tham số
     public NhaCungUngDTO() {}
 
     // Constructor đầy đủ tham số
-    public NhaCungUngDTO(String maNCU, String tenNCU, String maSoThue, String diaChi, String sdt, String email) {
+    public NhaCungUngDTO(String maNCU, String tenNCU, String maSoThue, String diaChi, String sdt, String email, int trangThai) {
         this.maNCU = maNCU;
         this.tenNCU = tenNCU;
         this.maSoThue = maSoThue;
         this.diaChi = diaChi;
         this.sdt = sdt;
         this.email = email;
+        this.trangThai = trangThai;
+
     }
 
-    // Getter & Setter
+
     public String getMaNCU() {
         return maNCU;
     }
@@ -70,10 +73,11 @@ public class NhaCungUngDTO {
     public void setEmail(String email) {
         this.email = email;
     }
+    public int getTrangThai() {
+        return trangThai;
+    }
 
-    @Override
-    public String toString() {
-        return "Mã NCU: " + maNCU + " | Tên NCU: " + tenNCU + " | Mã số thuế: " + maSoThue +
-               " | Địa chỉ: " + diaChi + " | SĐT: " + sdt + " | Email: " + email;
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
     }
 }

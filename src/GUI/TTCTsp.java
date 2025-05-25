@@ -19,8 +19,8 @@ import java.sql.PreparedStatement;
 
 public class TTCTsp extends BaseFrame {
     private SanPhamBLL bllSanPham = new SanPhamBLL();
-    private JTextArea txtTenSP, txtMaSP, cbLoaiSP, txtSoLuong, txtHSX, txtQcdg,  txtSodk,  txtGia, txtMaLSP, txtMaHSX;
-    private JLabel lblInfo;
+    private JTextArea txtTenSP, txtMaSP, cbLoaiSP, txtSoLuong, txtHSX, txtQcdg,  txtSodk,  txtGia, txtTT;
+
     public TTCTsp() {
         super("Thông tin sản phẩm");
         initialize();
@@ -34,16 +34,14 @@ public class TTCTsp extends BaseFrame {
             }
         }
 
-        // Các nút khác vẫn giữ màu mặc định
         for (JButton btn : menuButtons) {
             if (!btn.getText().equals("Sản phẩm")) {
-                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setBackground(Color.decode("#641A1F"));
                 btn.setFont(new Font("Arial", Font.BOLD, 12));
             }
         }
 
 
-        //Tiêu đề "Sản phẩm >> Thông tin sản phẩm" có thể nhấn
         JLabel lblSanPhamLink = new JLabel("<html><u>Sản phẩm</u></html>");
         lblSanPhamLink.setFont(new Font("Arial", Font.BOLD, 20));
         lblSanPhamLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -66,24 +64,11 @@ public class TTCTsp extends BaseFrame {
 
 
         // Form nhập sản phẩm
-        JLabel lblTenSP = new JLabel("Tên sản phẩm:");
+        JLabel lblTenSP = new JLabel("Mã sản phẩm:");
         lblTenSP.setBounds(270, 120, 150, 25);
         add(lblTenSP);
-        txtTenSP = new JTextArea();
-        txtTenSP.setBounds(270, 150, 400, 60);
-        txtTenSP.setLineWrap(true);
-        txtTenSP.setWrapStyleWord(true);
-        txtTenSP.setEditable(false);
-        txtTenSP.setFont(new Font("Arial", Font.BOLD, 20));
-        txtTenSP.setForeground(Color.decode("#641A1F"));
-        txtTenSP.setOpaque(false);
-        add(txtTenSP);
-
-        JLabel lblMaSP = new JLabel("Mã sản phẩm:");
-        lblMaSP.setBounds(700, 120, 150, 25);
-        add(lblMaSP);
         txtMaSP = new JTextArea();
-        txtMaSP.setBounds(700, 150, 400, 40);
+        txtMaSP.setBounds(270, 150, 400, 60);
         txtMaSP.setLineWrap(true);
         txtMaSP.setWrapStyleWord(true);
         txtMaSP.setEditable(false);
@@ -91,6 +76,19 @@ public class TTCTsp extends BaseFrame {
         txtMaSP.setForeground(Color.decode("#641A1F"));
         txtMaSP.setOpaque(false);
         add(txtMaSP);
+
+        JLabel lblMaSP = new JLabel("Tên sản phẩm:");
+        lblMaSP.setBounds(700, 120, 150, 25);
+        add(lblMaSP);
+        txtTenSP = new JTextArea();
+        txtTenSP.setBounds(700, 150, 400, 40);
+        txtTenSP.setLineWrap(true);
+        txtTenSP.setWrapStyleWord(true);
+        txtTenSP.setEditable(false);
+        txtTenSP.setFont(new Font("Arial", Font.BOLD, 20));
+        txtTenSP.setForeground(Color.decode("#641A1F"));
+        txtTenSP.setOpaque(false);
+        add(txtTenSP);
 
         JLabel lblLoaiSP = new JLabel("Loại sản phẩm:");
         lblLoaiSP.setBounds(270, 200, 150, 25);
@@ -173,6 +171,20 @@ public class TTCTsp extends BaseFrame {
         txtGia.setOpaque(false);
         add(txtGia);
 
+        //Trạng thái
+        JLabel lblTT = new JLabel("Trạng thái:");
+        lblTT.setBounds(270, 360, 150, 25);
+        add(lblTT);
+        txtTT = new JTextArea();
+        txtTT.setBounds(270, 390, 300, 40);
+        txtTT.setLineWrap(true);
+        txtTT.setWrapStyleWord(true);
+        txtTT.setEditable(false);
+        txtTT.setFont(new Font("Arial", Font.BOLD, 20));
+        txtTT.setForeground(Color.decode("#641A1F"));
+        txtTT.setOpaque(false);
+        add(txtTT);
+
         JButton btnXoa = new JButton("Xóa");
         btnXoa.setBounds(700, 520, 100, 40);
         btnXoa.setBackground(Color.decode("#F0483E"));
@@ -182,30 +194,27 @@ public class TTCTsp extends BaseFrame {
         btnXoa.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (currentuser.coQuyen("XOASANPHAM")) {
-                    int result = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        try (Connection conn = dbconnection.getConnection()) {
-                            String sql = "DELETE FROM SANPHAM WHERE MASP = ?";
-                            PreparedStatement pstmt = conn.prepareStatement(sql);
-                            pstmt.setString(1, txtMaSP.getText());
-                            int rowsAffected = pstmt.executeUpdate();
-                            if (rowsAffected > 0) {
-                                JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                                dispose();
-                                new SanPham(); // trở lại giao diện danh sách sản phẩm
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Xóa thất bại. Không tìm thấy sản phẩm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                            }
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }else {
-                        JOptionPane.showMessageDialog(null, "Bạn không có quyền xóa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-                    }}
+                if (!currentuser.coQuyen("Xóa sản phẩm")) {
+
+                    JOptionPane.showMessageDialog(null, "Bạn không có quyền xóa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                int result = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+
+                    boolean xoaThanhCong = bllSanPham.deleteSanPhamById(txtMaSP.getText());;
+                    if (xoaThanhCong) {
+                        JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                        new SanPham();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Xóa thất bại. Sản phẩm có thể đã liên kết dữ liệu khác.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
+
 
         JButton btnCapnhat = new JButton("Cập nhật");
         btnCapnhat.setBounds(860, 520, 100, 40);
@@ -216,11 +225,11 @@ public class TTCTsp extends BaseFrame {
         btnCapnhat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String maSP = txtMaSP.getText();  // hoặc nơi bạn hiển thị mã sản phẩm
+                String maSP = txtMaSP.getText();
                 dispose();
                 Capnhatttsp capNhatForm = new Capnhatttsp();
-                capNhatForm.loadProductInfoForUpdate(maSP);  // gọi phương thức load thông tin
-                capNhatForm.setVisible(true);  // mở form cập nhật
+                capNhatForm.loadProductInfoForUpdate(maSP);
+                capNhatForm.setVisible(true);
             }
         });
 
@@ -229,16 +238,19 @@ public class TTCTsp extends BaseFrame {
     }
 
 
-    public void setThongTin(String tenSP, String maSP, String loaiSP, int soLuong, String maHSX, String dongGoi,
-                            String soDk,  Double gia) {
-        txtTenSP.setText(tenSP);
+    public void setThongTin( String maSP, String tenSP,String loaiSP, int soLuong, String maHSX, String dongGoi, String soDk,  Double gia, int trangthai) {
         txtMaSP.setText(maSP);
-        cbLoaiSP.setText(loaiSP);
+        txtTenSP.setText(tenSP);
+        String tenLSP = bllSanPham.getLSPByMa(loaiSP);
+        cbLoaiSP.setText(tenLSP);
         txtSoLuong.setText(String.valueOf(soLuong));
-        txtHSX.setText(maHSX);  // Sử dụng tham số maHSX
+        String tenHSX = bllSanPham.getHSXByMa(maHSX);
+        txtHSX.setText(tenHSX);
         txtQcdg.setText(dongGoi);
         txtSodk.setText(soDk);
         txtGia.setText(String.valueOf(gia));
+        String ttText = (trangthai == 1) ? "Đang kinh doanh" : "Ngừng kinh doanh";
+        txtTT.setText(ttText);
 
         revalidate();
         repaint();

@@ -11,40 +11,39 @@ import java.sql.PreparedStatement;
 
 import bll.NhaCungUngBLL;
 import dal.dbconnection;
+import dto.currentuser;
 
 
 public class TTCTncu extends BaseFrame {
-	private NhaCungUngBLL bllncu = new NhaCungUngBLL();
-	private JTextArea txtTenNCU, txtMaNCU, txtMSTHUE, txtDC, txtSDT, txtEMAIL;
-    private JLabel lblInfo;
+    private JTextArea txtTenNCU, txtMaNCU, txtMSTHUE, txtDC, txtSDT, txtEMAIL,txtTT;
+
     public TTCTncu() {
-    	super("Thông tin nhà cung ứng");
-    	initialize();
-    } 
+        super("Thông tin nhà cung ứng");
+        initialize();
+    }
     @Override
-	protected void initUniqueComponents() {
-	 for (JButton btn : menuButtons) {
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
             if (btn.getText().equals("Nhà cung ứng")) {
-                btn.setBackground(Color.decode("#EF5D7A")); 
-                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
             }
         }
-        
-        // Các nút khác vẫn giữ màu mặc định
+
         for (JButton btn : menuButtons) {
             if (!btn.getText().equals("Nhà cung ứng")) {
-                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setBackground(Color.decode("#641A1F"));
                 btn.setFont(new Font("Arial", Font.BOLD, 12));
             }
         }
 
-        
+
         JLabel lblKhachhangLink = new JLabel("<html><u>Nhà cung ứng</u></html>");
         lblKhachhangLink.setFont(new Font("Arial", Font.BOLD, 20));
         lblKhachhangLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lblKhachhangLink.setBounds(270, 70, 160, 30);
         add(lblKhachhangLink);
-        
+
         lblKhachhangLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -52,41 +51,41 @@ public class TTCTncu extends BaseFrame {
                 new Nhacungung();
             }
         });
-        
-        
+
+
 
         JLabel lblArrow = new JLabel(" >> Thông tin nhà cung ứng");
         lblArrow.setFont(new Font("Arial", Font.BOLD, 20));
         lblArrow.setBounds(410, 70, 300, 30);
         add(lblArrow);
 
-        // form thêm nhân viên
+
         JLabel lblMaNCU = new JLabel("Mã nhà cung ứng:");
         lblMaNCU.setBounds(270, 120, 150, 30);
         add(lblMaNCU);
         txtMaNCU = new JTextArea();
-        txtMaNCU.setBounds(270, 150, 300, 40); 
+        txtMaNCU.setBounds(270, 150, 300, 40);
         txtMaNCU.setLineWrap(true);
         txtMaNCU.setWrapStyleWord(true);
         txtMaNCU.setEditable(false);
         txtMaNCU.setFont(new Font("Arial", Font.BOLD, 20));
         txtMaNCU.setForeground(Color.decode("#641A1F"));
-        txtMaNCU.setOpaque(false); 
+        txtMaNCU.setOpaque(false);
         add(txtMaNCU);
-     
+
         JLabel lblTen = new JLabel("Tên nhà cung ứng:");
         lblTen.setBounds(270, 200, 150, 30);
         add(lblTen);
         txtTenNCU = new JTextArea();
-        txtTenNCU.setBounds(270, 230, 300, 60);  
+        txtTenNCU.setBounds(270, 230, 300, 60);
         txtTenNCU.setLineWrap(true);
         txtTenNCU.setWrapStyleWord(true);
         txtTenNCU.setEditable(false);
         txtTenNCU.setFont(new Font("Arial", Font.BOLD, 20));
         txtTenNCU.setForeground(Color.decode("#641A1F"));
-        txtTenNCU.setOpaque(false);  
+        txtTenNCU.setOpaque(false);
         add(txtTenNCU);
-       
+
         JLabel lblMST = new JLabel("Mã số thuế:");
         lblMST.setBounds(270, 280, 150, 30);
         add(lblMST);
@@ -97,10 +96,10 @@ public class TTCTncu extends BaseFrame {
         txtMSTHUE.setEditable(false);
         txtMSTHUE.setFont(new Font("Arial", Font.BOLD, 20));
         txtMSTHUE.setForeground(Color.decode("#641A1F"));
-        txtMSTHUE.setOpaque(false); 
+        txtMSTHUE.setOpaque(false);
         add(txtMSTHUE);
 
-     
+
         JLabel lblDC = new JLabel("Địa chỉ:");
         lblDC.setBounds(270, 360, 150, 30);
         add(lblDC);
@@ -111,10 +110,10 @@ public class TTCTncu extends BaseFrame {
         txtDC.setEditable(false);
         txtDC.setFont(new Font("Arial", Font.BOLD, 20));
         txtDC.setForeground(Color.decode("#641A1F"));
-        txtDC.setOpaque(false); 
+        txtDC.setOpaque(false);
         add(txtDC);
 
-        
+
         JLabel lblSDT = new JLabel("Số điện thoại:");
         lblSDT.setBounds(700, 120, 150, 30);
         add(lblSDT);
@@ -125,10 +124,10 @@ public class TTCTncu extends BaseFrame {
         txtSDT.setEditable(false);
         txtSDT.setFont(new Font("Arial", Font.BOLD, 20));
         txtSDT.setForeground(Color.decode("#641A1F"));
-        txtSDT.setOpaque(false); 
+        txtSDT.setOpaque(false);
         add(txtSDT);
 
-      
+
         JLabel lblEmail = new JLabel("Email:");
         lblEmail.setBounds(700, 200, 150, 30);
         add(lblEmail);
@@ -139,8 +138,21 @@ public class TTCTncu extends BaseFrame {
         txtEMAIL.setEditable(false);
         txtEMAIL.setFont(new Font("Arial", Font.BOLD, 20));
         txtEMAIL.setForeground(Color.decode("#641A1F"));
-        txtEMAIL.setOpaque(false); 
+        txtEMAIL.setOpaque(false);
         add(txtEMAIL);
+
+        JLabel lblTT = new JLabel("Trạng thái:");
+        lblTT.setBounds(700, 280, 150, 25);
+        add(lblTT);
+        txtTT = new JTextArea();
+        txtTT.setBounds(700, 310, 300, 40);
+        txtTT.setLineWrap(true);
+        txtTT.setWrapStyleWord(true);
+        txtTT.setEditable(false);
+        txtTT.setFont(new Font("Arial", Font.BOLD, 20));
+        txtTT.setForeground(Color.decode("#641A1F"));
+        txtTT.setOpaque(false);
+        add(txtTT);
         // nút xóa
         JButton btnXoa = new JButton("Xóa");
         btnXoa.setBounds(700, 520, 100, 40);
@@ -152,23 +164,21 @@ public class TTCTncu extends BaseFrame {
         btnXoa.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!currentuser.coQuyen("Xóa nhà cung ứng")) {
+
+                    JOptionPane.showMessageDialog(null, "Bạn không có quyền xóa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 int result = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa nhà cung ứng này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
-                    try (Connection conn = dbconnection.getConnection()) {
-                        String sql = "DELETE FROM NHACUNGCAP WHERE MANCU = ?";
-                        PreparedStatement pstmt = conn.prepareStatement(sql);
-                        pstmt.setString(1, txtMaNCU.getText());
-                        int rowsAffected = pstmt.executeUpdate();
-                        if (rowsAffected > 0) {
-                            JOptionPane.showMessageDialog(null, "Đã xóa nhà cung ứng thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                            dispose();
-                            new Nhacungung(); // trở lại giao diện danh sách sản phẩm
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Xóa thất bại. Không tìm thấy sản phẩm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    NhaCungUngBLL ncuBLL = new NhaCungUngBLL();
+                    boolean xoaThanhCong = ncuBLL.deleteNCUById(txtMaNCU.getText());;
+                    if (xoaThanhCong) {
+                        JOptionPane.showMessageDialog(null, "Đã xóa nhà cung ứng thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                        new Nhacungung();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Xóa thất bại. Nhà cung ứng có thể đã liên kết dữ liệu khác.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -183,10 +193,11 @@ public class TTCTncu extends BaseFrame {
         btnCapnhat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String maNCU = txtMaNCU.getText();  // hoặc nơi bạn hiển thị mã sản phẩm
+                String maNCU = txtMaNCU.getText();
+                dispose();
                 Capnhatttncu capNhatForm = new Capnhatttncu();
-                capNhatForm.loadncuInfoForUpdate(maNCU);  // gọi phương thức load thông tin
-                capNhatForm.setVisible(true);  // mở form cập nhật
+                capNhatForm.loadncuInfoForUpdate(maNCU);
+                capNhatForm.setVisible(true);
             }
         });
 
@@ -194,18 +205,20 @@ public class TTCTncu extends BaseFrame {
         setVisible(true);
     }
 
-    public void setThongTin(String tenNCU, String maNCU, String MST, String DC, String SDT, 
-            String EMAIL) {
-txtTenNCU.setText(tenNCU);
-txtMaNCU.setText(maNCU);
-txtMSTHUE.setText(MST);
-txtDC.setText(DC);
-txtSDT.setText(SDT);
-txtEMAIL.setText(EMAIL);
+    public void setThongTin(String maNCU, String tenNCU, String MST, String DC, String SDT,
+                            String EMAIL, int trangthai) {
+        txtMaNCU.setText(maNCU);
+        txtTenNCU.setText(tenNCU);
+        txtMSTHUE.setText(MST);
+        txtDC.setText(DC);
+        txtSDT.setText(SDT);
+        txtEMAIL.setText(EMAIL);
+        String ttText = (trangthai == 1) ? "Đang hợp tác" : "Ngưng hợp tác";
+        txtTT.setText(ttText);
 
-revalidate();
-repaint();
-}
+        revalidate();
+        repaint();
+    }
     public static void main(String[] args) {
         new TTCTncu();
     }

@@ -1,32 +1,45 @@
 package dto;
 
 public class NhanVienDTO {
-	private String maNhanVien;
+    private String maNV;
     private String hoTen;
     private String cccd;
     private String sdt;
-    private String viTriCongViec;
+    private String maVT;
+    private String tenVaiTro;
     private String maSoThue;
+    private int trangThai;
     
     public NhanVienDTO() {
     }
     
-    public NhanVienDTO(String maNhanVien, String hoTen, String cccd, String sdt, String viTriCongViec, String maSoThue) {
-        this.maNhanVien = maNhanVien;
+    public NhanVienDTO(String maNV, String hoTen, String cccd, String sdt, String maVT, String maSoThue, int trangThai) {
+        this.maNV = maNV;
         this.hoTen = hoTen;
         this.cccd = cccd;
         this.sdt = sdt;
-        this.viTriCongViec = viTriCongViec;
+        this.maVT = maVT;
         this.maSoThue = maSoThue;
+        this.trangThai = trangThai;
+    }
+    public NhanVienDTO(String maNV, String hoTen, String cccd, String sdt, String maVT, String tenVT, String maSoThue, int trangThai) {
+        this.maNV = maNV;
+        this.hoTen = hoTen;
+        this.cccd = cccd;
+        this.sdt = sdt;
+        this.maVT = maVT;
+        this.tenVaiTro = tenVT;
+        this.maSoThue = maSoThue;
+        this.trangThai = trangThai;
     }
 
-    // Getter và Setter
+
     public String getMaNhanVien() {
-        return maNhanVien;
+        return maNV;
     }
 
     public void setMaNhanVien(String maNhanVien) {
-        this.maNhanVien = maNhanVien;
+        this.maNV = maNhanVien;
     }
 
     public String getHoTen() {
@@ -54,11 +67,11 @@ public class NhanVienDTO {
     }
 
     public String getViTriCongViec() {
-        return viTriCongViec;
+        return maVT;
     }
 
-    public void setViTriCongViec(String viTriCongViec) {
-        this.viTriCongViec = viTriCongViec;
+    public void setViTriCongViec(String maVT) {
+        this.maVT = maVT;
     }
 
     public String getMaSoThue() {
@@ -68,17 +81,30 @@ public class NhanVienDTO {
     public void setMaSoThue(String maSoThue) {
         this.maSoThue = maSoThue;
     }
-    
-    @Override
-    public String toString() {
-        return "NhanVien{" +
-                "maNhanVien='" + maNhanVien + '\'' +
-                ", hoTen='" + hoTen + '\'' +
-                ", cccd='" + cccd + '\'' +
-                ", sdt='" + sdt + '\'' +
-                ", MAVT='" + viTriCongViec + '\'' +
-                ", maSoThue='" + maSoThue + '\'' +
-                '}';
+
+    public int getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public String getTenVaiTro() {
+        return tenVaiTro;
+    }
+
+    public void setTenVaiTro(String tenVaiTro) {
+        this.tenVaiTro = tenVaiTro;
+    }
+
+    public String convertTenVTToMaVT(String tenVT) {
+        if ("Nhân viên bán hàng".equals(tenVT)) {
+            return "VT003";
+        } else if ("Nhân viên quản lý".equals(tenVT)) {
+            return "VT002";
+        }
+        return null;
     }
 
 }

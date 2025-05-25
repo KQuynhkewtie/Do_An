@@ -10,8 +10,8 @@ public class NhaCungUngBLL {
     private ncudal ncuDal = new ncudal();
 
     // Lấy danh sách khách hàng
-    public ArrayList<NhaCungUngDTO> layDSNCU() {
-        return ncuDal.layDSNCU();
+    public ArrayList<NhaCungUngDTO> getAllNCU() {
+        return ncuDal.getAllNCU();
     }
 
     // Lấy khách hàng theo mã
@@ -34,15 +34,20 @@ public class NhaCungUngBLL {
         return ncuDal.updateNCU(NCU);
     }
 
-    // Xóa khách hàng theo mã
     public boolean deleteNCUById(String maNCU) {
         return ncuDal.deleteNCUById(maNCU);
     }
 
-    // Xóa khách hàng theo tên
-    public boolean deleteNCUByName(String tenNCU) {
-        return ncuDal.deleteNCUByName(tenNCU);
-    }
+
+//    // Xóa khách hàng theo mã
+//    public boolean deleteNCUById(String maNCU) {
+//        return ncuDal.deleteNCUById(maNCU);
+//    }
+//
+//    // Xóa khách hàng theo tên
+//    public boolean deleteNCUByName(String tenNCU) {
+//        return ncuDal.deleteNCUByName(tenNCU);
+//    }
 
     // Để hiển thị theo tên ở pnh
 //    public List<NhaCungUngDTO> getNCUByTen(String tenNCU) {

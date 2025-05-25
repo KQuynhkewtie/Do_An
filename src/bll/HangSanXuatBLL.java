@@ -13,8 +13,8 @@ public class HangSanXuatBLL {
     }
 
     // Thêm hãng sản xuất
-    public boolean addHangSanXuat(HangSanXuatDTO hsx) {
-        return hangsanxuatDAL.addHangSanXuat(hsx);
+    public boolean insertHangSanXuat(HangSanXuatDTO hsx) {
+        return hangsanxuatDAL.insertHangSanXuat(hsx);
     }
 
     // Sửa thông tin hãng sản xuất

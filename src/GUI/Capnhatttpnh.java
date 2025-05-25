@@ -28,6 +28,9 @@ public class Capnhatttpnh extends BaseFrame {
     private String maPNH;
     private SanPhamDAL spDAL = new SanPhamDAL();
 
+    private JTable table;
+    private JScrollPane tableScrollPane;
+
     // Constructor không tham số
     public Capnhatttpnh() {
         super("Cập Nhật Phiếu Nhập Hàng");
@@ -160,24 +163,11 @@ public class Capnhatttpnh extends BaseFrame {
             }
         };
 
-        JTable table = new JTable(tableModel);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table = new JTable(tableModel); // Sử dụng biến instance
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
-
-//        // Thiết lập renderer cho các cột không được chỉnh sửa (0 và 1)
-//        DefaultTableCellRenderer nonEditableRenderer = new DefaultTableCellRenderer() {
-//            @Override
-//            public Component getTableCellRendererComponent(JTable table, Object value,
-//                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                c.setBackground(new Color(240, 240, 240));
-//                return c;
-//            }
-//        };
-//
-//        // Áp dụng renderer cho cột 0 và 1
-//        table.getColumnModel().getColumn(0).setCellRenderer(nonEditableRenderer);
-//        table.getColumnModel().getColumn(1).setCellRenderer(nonEditableRenderer);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Định dạng hiển thị số cho cột giá nhập (3)
         DefaultTableCellRenderer numberRenderer = new DefaultTableCellRenderer() {
@@ -272,9 +262,9 @@ public class Capnhatttpnh extends BaseFrame {
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 310, 800, 200);
-        add(scrollPane);
+        tableScrollPane = new JScrollPane(table); // Sử dụng biến instance
+        tableScrollPane.setBounds(270, 310, 800, 200);
+        add(tableScrollPane);
     }
 
     private void initActionButtons() {
@@ -287,8 +277,7 @@ public class Capnhatttpnh extends BaseFrame {
         JButton btnXoaDong = createActionButton("Xóa dòng", 400, 530, 120, 40);
         btnXoaDong.setBackground(Color.decode("#F44336"));
         btnXoaDong.addActionListener(e -> {
-            JTable table = (JTable) ((JScrollPane) getContentPane().getComponent(6)).getViewport().getView();
-            int row = table.getSelectedRow();
+            int row = table.getSelectedRow(); // Sử dụng biến instance table
             if (row != -1) {
                 tableModel.removeRow(row);
             } else {
@@ -391,13 +380,12 @@ public class Capnhatttpnh extends BaseFrame {
                 tableModel.addRow(new Object[]{maSP, tenSP, "1", ""});
                 dialog.dispose();
 
-                // Di chuyển focus đến ô số lượng của dòng mới
-                JTable mainTable = (JTable) ((JScrollPane) getContentPane().getComponent(6)).getViewport().getView();
+                // Focus vào ô số lượng của dòng mới
                 int newRow = tableModel.getRowCount() - 1;
-                mainTable.setRowSelectionInterval(newRow, newRow);
-                mainTable.setColumnSelectionInterval(2, 2);
-                mainTable.editCellAt(newRow, 2);
-                mainTable.getEditorComponent().requestFocusInWindow();
+                table.setRowSelectionInterval(newRow, newRow);
+                table.setColumnSelectionInterval(2, 2);
+                table.editCellAt(newRow, 2);
+                table.getEditorComponent().requestFocusInWindow();
             } else {
                 JOptionPane.showMessageDialog(dialog, "Vui lòng chọn một sản phẩm!",
                         "Thông báo", JOptionPane.WARNING_MESSAGE);

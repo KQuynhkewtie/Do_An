@@ -1,24 +1,38 @@
 package dto;
-import java.util.HashSet;
-import java.util.Set;
-import java.sql.*;
-import java.util.ArrayList;
+
 import java.util.List;
 public class currentuser {
-	private static String username;
+    private static String email;
+    private static String username;
     private static String maNhanVien;
     private static String maVaiTro;
-    private static List<String> danhSachQuyen; 
+    private static List<String> danhSachQuyen;
 
     public static void setUser(String user, String manv, String mavt, List<String> quyenList) {
-        username = user;
-        maNhanVien = manv;
-        maVaiTro = mavt;
-        danhSachQuyen = quyenList;
+        currentuser.username = user;
+        currentuser.maNhanVien = manv;
+        currentuser.maVaiTro = mavt;
+        currentuser.danhSachQuyen = quyenList;
+    }
+    public static void setUser(String email,String user, String manv, String mavt, List<String> quyenList) {
+        currentuser.email = email;
+        currentuser.username = user;
+        currentuser.maNhanVien = manv;
+        currentuser.maVaiTro = mavt;
+        currentuser.danhSachQuyen = quyenList;
+    }
+    public static String getEmail() {
+        return email;
+    }
+    public static void setEmail(String email) {
+        currentuser.email = email;
     }
 
     public static String getUsername() {
         return username;
+    }
+    public static void setUsername(String username) {
+        currentuser.username = username;
     }
 
     public static String getMaNhanVien() {
@@ -34,8 +48,15 @@ public class currentuser {
     }
 
     public static boolean coQuyen(String maQuyen) {
-        return danhSachQuyen != null && danhSachQuyen.contains(maQuyen);
+        if (danhSachQuyen == null || maQuyen == null) return false;
+        for (String quyen : danhSachQuyen) {
+            if (quyen != null && quyen.trim().equalsIgnoreCase(maQuyen.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
+
 
     public static void clear() {
         username = null;

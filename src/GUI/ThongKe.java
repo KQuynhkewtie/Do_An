@@ -186,6 +186,7 @@ import java.awt.*;
 public class ThongKe extends BaseFrame {
     private JLabel lblThongKe;
     private JTabbedPane tabbedPane;
+    private JPanel cardPanel;
 
     public ThongKe() {
         super("Thống kê");
@@ -198,7 +199,7 @@ public class ThongKe extends BaseFrame {
         // Label tiêu đề
         lblThongKe = new JLabel("Thống kê");
         lblThongKe.setFont(new Font("Arial", Font.BOLD, 20));
-        lblThongKe.setBounds(270, 70, 200, 30);
+        lblThongKe.setBounds(270, 50, 200, 30);
         add(lblThongKe);
 
         for (JButton btn : menuButtons) {
@@ -218,7 +219,7 @@ public class ThongKe extends BaseFrame {
 
         // Tạo panel chính giữa
         cardPanel = new JPanel();
-        cardPanel.setBounds(260, 110, 800, 540);
+        cardPanel.setBounds(260, 90, 800, 580);
         cardPanel.setLayout(new BorderLayout());
 
         // Tạo JTabbedPane
@@ -235,7 +236,7 @@ public class ThongKe extends BaseFrame {
         add(cardPanel); 
 
         // Các nút export nếu có
-        addPDFButton();
+        //addPDFButton();
         //addExceltButton();
     }
 

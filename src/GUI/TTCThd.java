@@ -154,8 +154,9 @@ public class TTCThd extends BaseFrame {
         };
 
         table = new JTable(tableModel);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -164,13 +165,13 @@ public class TTCThd extends BaseFrame {
     }
 
     private void initDeleteButton() {
-        JButton btnHuy = createActionButton("Hủy hóa đơn", 850, 580, 150, 40);
+        JButton btnHuy = createActionButton("Hủy", 730, 580, 100, 40);
         btnHuy.addActionListener(e -> huyHoaDon());
         add(btnHuy);
     }
 
     private void initUpdateButton() {
-        JButton btnCapNhat = createActionButton("Cập nhật", 870, 580, 150, 40);
+        JButton btnCapNhat = createActionButton("Cập nhật", 870, 580, 100, 40);
         btnCapNhat.addActionListener(e -> {
 
             HoaDonDTO hd = hdBLL.layHoaDonTheoMa(maHoaDon);

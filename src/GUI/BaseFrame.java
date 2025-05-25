@@ -1,19 +1,25 @@
 package GUI;
 
+import dal.vaitrodal;
+import dto.currentuser;
+
 import javax.swing.*;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public abstract class BaseFrame extends JFrame {
     protected JPanel sidebar;
     protected JPanel side;
+    protected JTable table;
     protected JTextField searchField;
     protected List<JButton> menuButtons;
-    protected CardLayout cardLayout; // CardLayout để quản lý các panel
-    protected JPanel cardPanel;
+    protected JButton btnExportExcel;
+    protected CardLayout cardLayout;
+    protected boolean showSearchBar = true;
 
     public BaseFrame(String title) {
         setTitle(title);
@@ -21,11 +27,10 @@ public abstract class BaseFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
-
         menuButtons = new ArrayList<>();
-
     }
 
+    protected boolean sidebarVisible = true;
     private void initCommonComponents() {
 
         sidebar = new JPanel();
@@ -35,7 +40,7 @@ public abstract class BaseFrame extends JFrame {
         add(sidebar);
 
         side = new JPanel();
-        side.setBounds(0, 0, 1100, 50);
+        side.setBounds(0, 0, 1100, 40);
         side.setBackground(Color.decode("#AB282C"));
         side.setLayout(null);
         add(side);
@@ -71,12 +76,15 @@ public abstract class BaseFrame extends JFrame {
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setOpaque(false);
 
-        JLabel nameLabel = new JLabel("Admin");
+
+        JLabel nameLabel = new JLabel(currentuser.getUsername() != null ? currentuser.getUsername() : "Chưa đăng nhập");
         nameLabel.setForeground(Color.WHITE);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel roleLabel = new JLabel("Quản lý");
+        vaitrodal vaitroDAL = new vaitrodal();
+        String tenVT = vaitroDAL.getTenVaiTro(currentuser.getMaVaiTro());
+        JLabel roleLabel = new JLabel(tenVT != null ? tenVT : "Không rõ vai trò");
         roleLabel.setForeground(Color.WHITE);
         roleLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         roleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -92,38 +100,52 @@ public abstract class BaseFrame extends JFrame {
         sidebar.add(userPanel);
 
         // Menu Buttons
-        String[] menuItems = { "Trang chủ", "Sản phẩm", "Loại sản phẩm", "Nhân viên", "Khách hàng", "Phiếu nhập hàng",
-                "Hóa đơn", "Doanh thu", "Hãng sản xuất", "Nhà cung ứng", "Đăng xuất" };
+        // Thay thế phần tạo menu buttons bằng đoạn code này
+        String[][] menuItems = {
+                {"Trang chủ", "image/homepage.png"},
+                {"Sản phẩm", "image/sanpham.png"},//
+                {"Loại sản phẩm", "image/loaisp.png"},
+                {"Nhân viên", "image/nhanvien.png"},//
+                {"Khách hàng", "image/khachhang.png"},//
+                {"Phiếu nhập hàng", "image/pnh.png"},//
+                {"Hóa đơn", "image/hoadon.png"},//
+                {"Thống kê", "image/thongke.png"},//
+                {"Hãng sản xuất", "image/hsx.png"},//
+                {"Nhà cung ứng", "image/ncu.png"},//
+                {"Đăng xuất", "image/dangxuat.png"}//
+        };
 
-        for (String item : menuItems) {
-            JButton btn = new JButton(item);
-            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(400, 50));
-            btn.setBackground(Color.decode("#641A1F"));
-            btn.setForeground(Color.WHITE);
-            btn.setFont(new Font("Arial", Font.BOLD, 12));
-            btn.setFocusPainted(false);
-            btn.setBorderPainted(false);
-            btn.setContentAreaFilled(true);
-            btn.setMargin(new Insets(0, 0, 0, 0));
-            btn.setOpaque(true);
+        for (String[] item : menuItems) {
+            JButton btn = createMenuButton(item[0], item[1]);
             sidebar.add(btn);
             menuButtons.add(btn);
+
+            if (item[0].equals("Đăng xuất")) {
+                btn.addActionListener(e -> {
+                    int confirmed = JOptionPane.showConfirmDialog(null,
+                            "Bạn có chắc chắn muốn đăng xuất?", "Đăng xuất", JOptionPane.YES_NO_OPTION);
+                    if (confirmed == JOptionPane.YES_OPTION) {
+                        currentuser.clear();
+                        dispose();
+                        SignIn loginFrame = new SignIn();
+                        loginFrame.setVisible(true);
+                    }
+                });
+            }
         }
 
         // Thiết lập sự kiện navigation
         setupNavigation("Trang chủ", HomePage::new);
         setupNavigation("Sản phẩm", SanPham::new);
         setupNavigation("Hóa đơn", HoaDon::new);
-        setupNavigation("Doanh thu", DoanhThu::new);
+        setupNavigation("Thống kê", ThongKe::new);
         setupNavigation("Nhân viên", NhanVien::new);
         setupNavigation("Khách hàng", KhachHang::new);
         setupNavigation("Nhà cung ứng", Nhacungung::new);
-        // setupNavigation("Hãng sản xuất", Hangsanxuat::new);
-        setupNavigation("Phiếu nhập hàng", PhieuNhapHang::new);
+        setupNavigation("Hãng sản xuất", HangSX::new);
         setupNavigation("Loại sản phẩm", LoaiSP::new);
-        setupNavigation("Đăng xuất", Login::new);
-
+        setupNavigation("Phiếu nhập hàng", PhieuNhapHang::new);
+        setupNavigation("Hóa đơn", HoaDon::new);
     }
 
     protected void initialize() {
@@ -133,25 +155,25 @@ public abstract class BaseFrame extends JFrame {
 
     protected abstract void initUniqueComponents();
 
-    private void setupNavigation(String menuItem, Runnable action) {
+    private void setupNavigation(String menuItem, Supplier<? extends BaseFrame> frameSupplier) {
         for (JButton btn : menuButtons) {
             if (btn.getText().equals(menuItem)) {
-                // Đặt lại màu sắc cho các nút
                 for (JButton button : menuButtons) {
-                    // Chỉ thay đổi màu của các nút không phải là nút hiện tại
                     if (!button.getText().equals(menuItem)) {
                         button.setBackground(Color.decode("#641A1F"));
                         button.setForeground(Color.WHITE);
                         button.setFont(new Font("Arial", Font.BOLD, 12));
                     }
                 }
-                // Làm nổi bật nút hiện tại
                 btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setForeground(Color.WHITE);
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
 
-                // Cập nhật hành động khi nhấn nút
                 btn.addActionListener(e -> {
+                    BaseFrame newFrame = frameSupplier.get();
+                    newFrame.setVisible(true);
+
                     dispose();
-                    action.run(); // Chạy hành động tương ứng với nút
                 });
                 break;
             }
@@ -173,7 +195,7 @@ public abstract class BaseFrame extends JFrame {
         ImageIcon resizedIconPDF = new ImageIcon(imgPDF);
 
         JButton btnExportPDF = new JButton(resizedIconPDF);
-        btnExportPDF.setBounds(970, 65, 40, 40);
+        btnExportPDF.setBounds(970, 50, 40, 40);
 
         btnExportPDF.setBackground(null); // Không có nền
         btnExportPDF.setBorderPainted(false); // Không có viền
@@ -204,21 +226,20 @@ public abstract class BaseFrame extends JFrame {
         ImageIcon resizedIconExcel = new ImageIcon(imgExcel);
 
         JButton btnExportExcel = new JButton(resizedIconExcel);
-        btnExportExcel.setBounds(900, 60, 50, 50);
+        btnExportExcel.setBounds(900, 50, 40, 40);
 
-        // Loại bỏ mọi màu nền và viền
-        btnExportExcel.setBackground(null); // Không có nền
-        btnExportExcel.setBorderPainted(false); // Không có viền
-        btnExportExcel.setFocusPainted(false); // Không có viền khi focus
-        btnExportExcel.setContentAreaFilled(false); // Không tô nền khi hover
+        btnExportExcel.setBackground(null);
+        btnExportExcel.setBorderPainted(false);
+        btnExportExcel.setFocusPainted(false);
+        btnExportExcel.setContentAreaFilled(false);
 
-        // Đảm bảo button có thể nhấn
+
         btnExportExcel.setOpaque(true);
 
-        // Thay đổi con trỏ thành hình bàn tay khi rê chuột vào button
+
         btnExportExcel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Gắn sự kiện cho button
+
         btnExportExcel.addActionListener(e -> {
             try {
                 if (table != null && table.getRowCount() > 0) {
@@ -238,5 +259,33 @@ public abstract class BaseFrame extends JFrame {
 
         add(btnExportExcel);
 
+    }
+
+    private JButton createMenuButton(String text, String iconPath) {
+        // Tạo button
+        JButton btn = new JButton(text);
+
+        // Thiết lập icon nếu có đường dẫn
+        if (iconPath != null && !iconPath.isEmpty()) {
+            ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconPath));
+            Image image = icon.getImage().getScaledInstance(22, 26, Image.SCALE_SMOOTH); // Kích thước icon 20x20
+            btn.setIcon(new ImageIcon(image));
+            btn.setHorizontalAlignment(SwingConstants.LEFT); // Căn trái cả icon và text
+            btn.setIconTextGap(15); // Khoảng cách giữa icon và text
+        }
+
+        // Các thiết lập style khác
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(300, 49)); // Giảm width để phù hợp với icon
+        btn.setBackground(Color.decode("#641A1F"));
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Arial", Font.BOLD, 12));
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(true);
+        btn.setMargin(new Insets(0, 40, 0, 0)); // Thêm padding trái
+        btn.setOpaque(true);
+
+        return btn;
     }
 }

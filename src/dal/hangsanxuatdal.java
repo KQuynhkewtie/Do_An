@@ -21,7 +21,8 @@ public class hangsanxuatdal {
                         rs.getString("TENHSX"),
                         rs.getString("MASOTHUE"),
                         rs.getString("DIACHI"),
-                        rs.getString("SDT")
+                        rs.getString("SDT"),
+                        rs.getInt("TRANGTHAI")
                 );
                 danhSachHSX.add(hsx);
             }
@@ -32,11 +33,11 @@ public class hangsanxuatdal {
     }
 
     public HangSanXuatDTO getHSXById(String maHSX) {
-        String query = "SELECT * FROM HANGSANXUAT WHERE MAHSX = ?";
+        String query = "SELECT * FROM HANGSANXUAT WHERE TRIM(MAHSX) = ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, maHSX);
+            stmt.setString(1, maHSX.trim());
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -45,7 +46,8 @@ public class hangsanxuatdal {
                             rs.getString("TENHSX"),
                             rs.getString("MASOTHUE"),
                             rs.getString("DIACHI"),
-                            rs.getString("SDT")
+                            rs.getString("SDT"),
+                            rs.getInt("TRANGTHAI")
                     );
                 }
             }
@@ -56,7 +58,7 @@ public class hangsanxuatdal {
     }
 
     // Thêm hãng sản xuất mới
-    public boolean addHangSanXuat(HangSanXuatDTO hsx) {
+    public boolean insertHangSanXuat(HangSanXuatDTO hsx) {
         String sql = "INSERT INTO HANGSANXUAT (MAHSX, TENHSX, MASOTHUE, DIACHI, SDT) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseHelper.getConnection();
@@ -66,6 +68,7 @@ public class hangsanxuatdal {
             ps.setString(3, hsx.getMaSoThue());
             ps.setString(4, hsx.getDiaChi());
             ps.setString(5, hsx.getSdt());
+            ps.setInt(6, hsx.getTrangThai());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -76,7 +79,7 @@ public class hangsanxuatdal {
 
     // Cập nhật thông tin hãng sản xuất
     public boolean updateHangSanXuat(HangSanXuatDTO hsx) {
-        String sql = "UPDATE HANGSANXUAT SET TENHSX=?, MASOTHUE=?, DIACHI=?, SDT=? WHERE TRIM(MAHSX)=?";
+        String sql = "UPDATE HANGSANXUAT SET TENHSX=?, MASOTHUE=?, DIACHI=?, SDT=?, TRANGTHAI = ? WHERE TRIM(MAHSX)=?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -84,7 +87,8 @@ public class hangsanxuatdal {
             ps.setString(2, hsx.getMaSoThue());
             ps.setString(3, hsx.getDiaChi());
             ps.setString(4, hsx.getSdt());
-            ps.setString(5, hsx.getMaHSX());
+            ps.setInt(5, hsx.getTrangThai());
+            ps.setString(6, hsx.getMaHSX());
 
             int rows = ps.executeUpdate();
             System.out.println("Rows affected: " + rows);
@@ -111,11 +115,15 @@ public class hangsanxuatdal {
 
     public List<HangSanXuatDTO> getHSX(String keyword) {
         List<HangSanXuatDTO> danhSachHSX = new ArrayList<>();
-        String sql = "SELECT * FROM HANGSANXUAT WHERE LOWER(TENHSX) LIKE ?";
+        String sql = "SELECT * FROM HANGSANXUAT WHERE LOWER(TENHSX) LIKE ? OR LOWER(MAHSX) LIKE ? OR MASOTHUE LIKE ? OR LOWER(DIACHI) LIKE ? OR SDT LIKE ?";
 
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword.toLowerCase() + "%");
+            ps.setString(2, "%" + keyword.toLowerCase() + "%");
+            ps.setString(3, "%" + keyword + "%");
+            ps.setString(4, "%" + keyword.toLowerCase() + "%");
+            ps.setString(5, "%" + keyword+ "%");
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -124,7 +132,8 @@ public class hangsanxuatdal {
                         rs.getString("TENHSX"),
                         rs.getString("MASOTHUE"),
                         rs.getString("DIACHI"),
-                        rs.getString("SDT")
+                        rs.getString("SDT"),
+                        rs.getInt("TRANGTHAI")
                 );
                 danhSachHSX.add(hsx);
             }

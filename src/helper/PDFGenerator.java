@@ -4,13 +4,11 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
-import bll.HoaDonBLL;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -30,9 +28,14 @@ public class PDFGenerator {
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
-        fileChooser.setSelectedFile(new File("HoaDon_" + hd.getMaHoaDon() + ".pdf"));
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("PDF files", "pdf");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
-        int userSelection = fileChooser.showSaveDialog(parentFrame);
+        int userSelection = fileChooser.showSaveDialog(null);
+        if (userSelection != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
 
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
@@ -61,16 +64,17 @@ public class PDFGenerator {
         PdfWriter.getInstance(document, new FileOutputStream(filePath));
         document.open();
 
-        // Font Unicode (sử dụng font mặc định của hệ thống)
+        // Font Unicode
         BaseFont bf = BaseFont.createFont(
-                "c:/windows/fonts/times.ttf",  // Đường dẫn font Times New Roman
+                "c:/windows/fonts/times.ttf",
                 BaseFont.IDENTITY_H,
                 BaseFont.EMBEDDED
         );
 
         Font fontTitle = new Font(bf, 18, Font.BOLD);
         Font fontHeader = new Font(bf, 14, Font.BOLD);
-        Font fontNormal = new Font(bf, 12, Font.NORMAL);
+        Font fontNormal = new Font(bf, 13, Font.NORMAL);
+        Font fontBold = new Font(bf, 12, Font.BOLD);
 
         // Tiêu đề
         Paragraph title = new Paragraph("HÓA ĐƠN BÁN HÀNG", fontTitle);
@@ -78,29 +82,26 @@ public class PDFGenerator {
         title.setSpacingAfter(20f);
         document.add(title);
 
-        // Thông tin hóa đơn
-        PdfPTable infoTable = new PdfPTable(2);
-        infoTable.setWidthPercentage(100);
-        infoTable.setSpacingBefore(10f);
-        infoTable.setSpacingAfter(10f);
+        // Thông tin hóa đơn (không dùng table)
+        Paragraph maHoaDon = new Paragraph("Mã hóa đơn: " + hd.getMaHoaDon(), fontNormal);
+        maHoaDon.setSpacingAfter(5f);
+        document.add(maHoaDon);
 
-        addCell(infoTable, "Mã hóa đơn:", fontHeader);
-        addCell(infoTable, hd.getMaHoaDon(), fontNormal);
-        addCell(infoTable, "Mã nhân viên:", fontHeader);
-        addCell(infoTable, hd.getMaNhanVien(), fontNormal);
-        addCell(infoTable, "Mã khách hàng:", fontHeader);
-        addCell(infoTable, hd.getMaKH() != null ? hd.getMaKH() : "Không có", fontNormal);
-        addCell(infoTable, "Ngày lập:", fontHeader);
-        addCell(infoTable, new SimpleDateFormat("dd/MM/yyyy").format(hd.getNgayBan()), fontNormal);
-        addCell(infoTable, "Trạng thái:", fontHeader);
-        addCell(infoTable, "DA_HUY".equals(hd.getTrangThai()) ? "Đã hủy" : "Bình thường", fontNormal);
+        Paragraph ngayBan = new Paragraph("Ngày bán: " + new SimpleDateFormat("dd/MM/yyyy").format(hd.getNgayBan()), fontNormal);
+        ngayBan.setSpacingAfter(5f);
+        document.add(ngayBan);
 
-        document.add(infoTable);
+        Paragraph nhanVien = new Paragraph("Nhân viên thanh toán: " + hd.getMaNhanVien(), fontNormal);
+        nhanVien.setSpacingAfter(5f);
+        document.add(nhanVien);
+
+        Paragraph khachHang = new Paragraph("Khách hàng: " + (hd.getMaKH() != null ? hd.getMaKH() : ""), fontNormal);
+        khachHang.setSpacingAfter(20f);
+        document.add(khachHang);
 
         // Danh sách sản phẩm
         Paragraph productTitle = new Paragraph("DANH SÁCH SẢN PHẨM", fontHeader);
         productTitle.setAlignment(Element.ALIGN_CENTER);
-        productTitle.setSpacingBefore(20f);
         productTitle.setSpacingAfter(10f);
         document.add(productTitle);
 
@@ -109,11 +110,11 @@ public class PDFGenerator {
         productTable.setSpacingAfter(20f);
 
         // Header
-        addCell(productTable, "Mã SP", fontHeader);
-        addCell(productTable, "Tên sản phẩm", fontHeader);
-        addCell(productTable, "Số lượng", fontHeader);
-        addCell(productTable, "Đơn giá", fontHeader);
-        addCell(productTable, "Thành tiền", fontHeader);
+        addCell(productTable, "Mã SP", fontBold);
+        addCell(productTable, "Tên sản phẩm", fontBold);
+        addCell(productTable, "Số lượng", fontBold);
+        addCell(productTable, "Đơn giá", fontBold);
+        addCell(productTable, "Thành tiền", fontBold);
 
         // Dữ liệu
         for (ChiTietHoaDonDTO ct : chiTiet) {
@@ -129,11 +130,33 @@ public class PDFGenerator {
 
         document.add(productTable);
 
-        // Tổng tiền
-        Paragraph total = new Paragraph("TỔNG CỘNG: " + formatCurrency(hd.getThanhTien()), fontHeader);
-        total.setAlignment(Element.ALIGN_RIGHT);
-        total.setSpacingBefore(10f);
-        document.add(total);
+        double tongCong = chiTiet.stream()
+                .mapToDouble(ct -> ct.getSoLuong() * ct.getGia())
+                .sum();
+
+        // Thông tin thanh toán (không dùng table)
+        Paragraph TongCong = new Paragraph("Tổng cộng: " + formatCurrency(tongCong), fontBold);
+        TongCong.setSpacingAfter(5f);
+        document.add(TongCong);
+
+        Paragraph giamGia = new Paragraph("Giảm giá:......................................", fontNormal);
+        giamGia.setSpacingAfter(5f);
+        document.add(giamGia);
+
+        Paragraph khachThanhToan = new Paragraph("Khách thanh toán:.........................", fontNormal);
+        khachThanhToan.setSpacingAfter(20f);
+        document.add(khachThanhToan);
+
+        // Hình thức thanh toán
+        Paragraph paymentMethod = new Paragraph("Hình thức thanh toán: □ Tiền mặt □ Chuyển khoản □ Momo/QR", fontNormal);
+        paymentMethod.setAlignment(Element.ALIGN_LEFT);
+        paymentMethod.setSpacingBefore(10f);
+        document.add(paymentMethod);
+
+        // Ghi chú
+        Paragraph notes = new Paragraph("Ghi chú (nếu có):\n.........................................................................", fontNormal);
+        notes.setSpacingBefore(10f);
+        document.add(notes);
 
         // Ký tên
         Paragraph signature = new Paragraph("\n\n\n\nNgười lập\n(Ký và ghi rõ họ tên)", fontNormal);

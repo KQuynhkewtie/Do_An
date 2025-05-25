@@ -145,6 +145,7 @@ public class TTCTpnh extends BaseFrame {
         tableModel.addColumn("Thành tiền");
 
         table = new JTable(tableModel);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         table.setFont(new Font("Arial", Font.PLAIN, 14));

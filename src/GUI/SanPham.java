@@ -31,11 +31,9 @@ public class SanPham extends BaseFrame {
                 btn.setFont(new Font("Arial", Font.BOLD, 14));
             }
         }
-
-        // Các nút khác vẫn giữ màu mặc định
         for (JButton btn : menuButtons) {
             if (!btn.getText().equals("Sản phẩm")) {
-                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setBackground(Color.decode("#641A1F"));
                 btn.setFont(new Font("Arial", Font.BOLD, 12));
             }
         }
@@ -87,23 +85,26 @@ public class SanPham extends BaseFrame {
         add(btnThemSP);
 
         // Table
-        String[] columnNames = {"Tên sản phẩm", "Mã sản phẩm", "Loại sản phẩm", "Số lượng", "Hạn sử dụng"};
+        String[] columnNames = {"Mã sản phẩm", "Tên sản phẩm", "Loại sản phẩm", "Số lượng"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 180, 720, 400);
+        scrollPane.setBounds(270, 150, 800, 500);
         add(scrollPane);
 
         addExceltButton(table);
 
-        // Hiển thị danh sách sản phẩm từ database
         loadSanPham();
 
         btnThemSP.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose(); // Đóng cửa sổ hiện tại
-                new Themsp(); // Mở giao diện Thêm sản phẩm
+                dispose();
+                new Themsp();
             }
         });
 
@@ -113,12 +114,12 @@ public class SanPham extends BaseFrame {
                 if (e.getClickCount() == 1) {
                     int row = table.getSelectedRow();
                     if (row >= 0) {
-                        String maSanPham = table.getValueAt(row, 1).toString();
+                        String maSanPham = table.getValueAt(row, 0).toString();
                         SanPhamDTO sp = bllSanPham.getSanPhamById(maSanPham);
                         if (sp != null) {
                             dispose();
                             TTCTsp ctsp = new TTCTsp();
-                            ctsp.setThongTin(sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(), sp.getMaHSX(), sp.getQuyCachDongGoi(),sp.getSoDangKy(), sp.getGiaBan());
+                            ctsp.setThongTin(sp.getMaSP(),sp.getTenSP(),  sp.getMaLSP(), sp.getsoluong(), sp.getMaHSX(), sp.getQuyCachDongGoi(),sp.getSoDangKy(),  sp.getGiaBan(), sp.getTrangThai());
 
                         } else {
                             JOptionPane.showMessageDialog(null, "Không tìm thấy sản phẩm!");
@@ -136,18 +137,15 @@ public class SanPham extends BaseFrame {
 
 
     private void loadSanPham() {
-        model.setRowCount(0); // Xóa tất cả các dòng trong bảng
+        model.setRowCount(0);
         List<SanPhamDTO> list = bllSanPham.getAllSanPham();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-
         for (SanPhamDTO sp : list) {
-
-            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong(),});
+            model.addRow(new Object[]{ sp.getMaSP(),sp.getTenSP(), sp.getMaLSP(), sp.getsoluong(),});
         }
     }
 
     private void searchSanPham() {
-        String keyword = searchproductField.getText().trim();// Lấy từ khóa tìm kiếm từ ô nhập liệu
+        String keyword = searchproductField.getText().trim();
         if (keyword.equals("Tìm") || keyword.isEmpty()) {
             loadSanPham();
             return;
@@ -155,11 +153,9 @@ public class SanPham extends BaseFrame {
 
         model.setRowCount(0);
         List<SanPhamDTO> list = bllSanPham.getSanPham(keyword);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
         for (SanPhamDTO sp : list) {
-
-            model.addRow(new Object[]{sp.getTenSP(), sp.getMaSP(), sp.getMaLSP(), sp.getsoluong()});
+            model.addRow(new Object[]{ sp.getMaSP(),sp.getTenSP(), sp.getMaLSP(), sp.getsoluong()});
         }
     }
 

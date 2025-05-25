@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import bll.NhanVienBLL;
 import dal.dbconnection;
+import dto.currentuser;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,37 +15,35 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 public class TTCTnv extends BaseFrame {
-	private NhanVienBLL bllnv = new NhanVienBLL();
-	private JTextArea txtTenNV, txtMaNV, txtCCCD, txtSDT, txtvitri, txtMST;
-    private JLabel lblInfo;
+    private NhanVienBLL bllnv = new NhanVienBLL();
+    private JTextArea txtTenNV, txtMaNV, txtCCCD, txtSDT, txtvitri, txtMST, txtTT;
+
     public TTCTnv() {
-    	super("Thông tin nhân viên");
-    	initialize();
-    } 
+        super("Thông tin nhân viên");
+        initialize();
+    }
     @Override
-	protected void initUniqueComponents() {
-	 for (JButton btn : menuButtons) {
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
             if (btn.getText().equals("Nhân viên")) {
-                btn.setBackground(Color.decode("#EF5D7A")); 
-                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
             }
         }
-        
-        // Các nút khác vẫn giữ màu mặc định
+
         for (JButton btn : menuButtons) {
             if (!btn.getText().equals("Nhân viên")) {
-                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
+                btn.setBackground(Color.decode("#641A1F"));
                 btn.setFont(new Font("Arial", Font.BOLD, 12));
             }
         }
 
-        // tiêu đề "Khách hàng >> Thông tin khách hàng" có thể nhấn tương tự như trên
         JLabel lblKhachhangLink = new JLabel("<html><u>Nhân viên</u></html>");
         lblKhachhangLink.setFont(new Font("Arial", Font.BOLD, 20));
         lblKhachhangLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         lblKhachhangLink.setBounds(270, 70, 100, 30);
         add(lblKhachhangLink);
-        // bấm vào "Khách hàng" sẽ quay về trang khách hàng
+
         lblKhachhangLink.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -56,8 +55,8 @@ public class TTCTnv extends BaseFrame {
         lblArrow.setFont(new Font("Arial", Font.BOLD, 20));
         lblArrow.setBounds(370, 70, 300, 30);
         add(lblArrow);
-        
-        
+
+
         // form thêm nhân viên
         JLabel lblMaNV = new JLabel("Mã nhân viên:");
         lblMaNV.setBounds(270, 120, 150, 30);
@@ -69,7 +68,7 @@ public class TTCTnv extends BaseFrame {
         txtMaNV.setEditable(false);
         txtMaNV.setFont(new Font("Arial", Font.BOLD, 20));
         txtMaNV.setForeground(Color.decode("#641A1F"));
-        txtMaNV.setOpaque(false); 
+        txtMaNV.setOpaque(false);
         add(txtMaNV);
         // họ tên
         JLabel lblHoTen = new JLabel("Họ tên:");
@@ -82,7 +81,7 @@ public class TTCTnv extends BaseFrame {
         txtTenNV.setEditable(false);
         txtTenNV.setFont(new Font("Arial", Font.BOLD, 20));
         txtTenNV.setForeground(Color.decode("#641A1F"));
-        txtTenNV.setOpaque(false); 
+        txtTenNV.setOpaque(false);
         add(txtTenNV);
 
         // số điện thoại
@@ -96,7 +95,7 @@ public class TTCTnv extends BaseFrame {
         txtSDT.setEditable(false);
         txtSDT.setFont(new Font("Arial", Font.BOLD, 20));
         txtSDT.setForeground(Color.decode("#641A1F"));
-        txtSDT.setOpaque(false); 
+        txtSDT.setOpaque(false);
         add(txtSDT);
 
         // cccd
@@ -110,7 +109,7 @@ public class TTCTnv extends BaseFrame {
         txtCCCD.setEditable(false);
         txtCCCD.setFont(new Font("Arial", Font.BOLD, 20));
         txtCCCD.setForeground(Color.decode("#641A1F"));
-        txtCCCD.setOpaque(false); 
+        txtCCCD.setOpaque(false);
         add(txtCCCD);
 
         // vị trí công việc
@@ -124,7 +123,7 @@ public class TTCTnv extends BaseFrame {
         txtvitri.setEditable(false);
         txtvitri.setFont(new Font("Arial", Font.BOLD, 20));
         txtvitri.setForeground(Color.decode("#641A1F"));
-        txtvitri.setOpaque(false); 
+        txtvitri.setOpaque(false);
         add(txtvitri);
 
         // mã số thuế
@@ -138,36 +137,47 @@ public class TTCTnv extends BaseFrame {
         txtMST.setEditable(false);
         txtMST.setFont(new Font("Arial", Font.BOLD, 20));
         txtMST.setForeground(Color.decode("#641A1F"));
-        txtMST.setOpaque(false); 
+        txtMST.setOpaque(false);
         add(txtMST);
+        //Trạng thái
+        JLabel lblTT = new JLabel("Trạng thái:");
+        lblTT.setBounds(700, 280, 150, 30);
+        add(lblTT);
+        txtTT = new JTextArea();
+        txtTT.setBounds(700, 310, 300, 30);
+        txtTT.setLineWrap(true);
+        txtTT.setWrapStyleWord(true);
+        txtTT.setEditable(false);
+        txtTT.setFont(new Font("Arial", Font.BOLD, 20));
+        txtTT.setForeground(Color.decode("#641A1F"));
+        txtTT.setOpaque(false);
+        add(txtTT);
         // nút xóa
         JButton btnXoa = new JButton("Xóa");
         btnXoa.setBounds(700, 520, 100, 40);
         btnXoa.setBackground(Color.decode("#F0483E"));
         btnXoa.setForeground(Color.WHITE);
         add(btnXoa);
-        
+
 
         btnXoa.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!currentuser.coQuyen("Xóa nhân viên")) {
+
+                    JOptionPane.showMessageDialog(null, "Bạn không có quyền xóa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
                 int result = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa nhân viên này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
-                    try (Connection conn = dbconnection.getConnection()) {
-                        String sql = "DELETE FROM NHANVIEN WHERE MANHANVIEN = ?";
-                        PreparedStatement pstmt = conn.prepareStatement(sql);
-                        pstmt.setString(1, txtMaNV.getText());
-                        int rowsAffected = pstmt.executeUpdate();
-                        if (rowsAffected > 0) {
-                            JOptionPane.showMessageDialog(null, "Đã xóa nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                            dispose();
-                            new NhanVien(); // trở lại giao diện danh sách sản phẩm
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Xóa thất bại. Không tìm thấy nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Lỗi khi xóa nhân viên", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    NhanVienBLL nvBLL = new NhanVienBLL();
+                    boolean xoaThanhCong = nvBLL.deleteNhanVien(txtMaNV.getText());;
+                    if (xoaThanhCong) {
+                        JOptionPane.showMessageDialog(null, "Đã xóa nhân viên thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                        new NhanVien();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Xóa thất bại. Nhân viên có thể đã liên kết dữ liệu khác.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -182,10 +192,11 @@ public class TTCTnv extends BaseFrame {
         btnCapnhat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String maNV = txtMaNV.getText();  // hoặc nơi bạn hiển thị mã sản phẩm
+                String maNV = txtMaNV.getText();
+                dispose();
                 Capnhatttnv capNhatForm = new Capnhatttnv();
-                capNhatForm.loadnvInfoForUpdate(maNV);  // gọi phương thức load thông tin
-                capNhatForm.setVisible(true);  // mở form cập nhật
+                capNhatForm.loadnvInfoForUpdate(maNV);
+                capNhatForm.setVisible(true);
             }
         });
 
@@ -193,19 +204,21 @@ public class TTCTnv extends BaseFrame {
         setVisible(true);
 
     }
-    public void setThongTin(String maNV, String tenNV, String CCCD, String SDT, String vitri, 
-            String mst) {
-txtMaNV.setText(maNV);
-txtTenNV.setText(tenNV);
-txtCCCD.setText(CCCD);
-txtSDT.setText(SDT);
-txtvitri.setText(vitri);  
-txtMST.setText(mst);
+    public void setThongTin(String maNV, String tenNV, String CCCD, String SDT, String vitri,
+                            String mst, int trangthai) {
+        txtMaNV.setText(maNV);
+        txtTenNV.setText(tenNV);
+        txtCCCD.setText(CCCD);
+        txtSDT.setText(SDT);
+        String tenVitri = bllnv.getTenViTriByMa(vitri);
+        txtvitri.setText(tenVitri);
+        txtMST.setText(mst);
+        String ttText = (trangthai == 1) ? "Đang làm" : "Nghỉ làm";
+        txtTT.setText(ttText);
 
-
-revalidate();
-repaint();
-}
+        revalidate();
+        repaint();
+    }
 
     public static void main(String[] args) {
         new TTCTnv();

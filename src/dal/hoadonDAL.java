@@ -2,15 +2,14 @@ package dal;
 
 import dto.HoaDonDTO;
 import dto.ChiTietHoaDonDTO;
-
 import javax.swing.*;
 import java.sql.*;
 import java.util.*;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.stream.Collectors;
 
 
 public class hoadonDAL {
@@ -51,29 +50,6 @@ public class hoadonDAL {
             closeResources();
         }
         return danhSach;
-    }
-
-    // Thêm hóa đơn mới
-    public boolean themHoaDon(HoaDonDTO hd) {
-        String sql = "INSERT INTO HOADON (MAHD, MANV, MAKH, NGAYBAN, THANHTIEN, TRANGTHAI) VALUES (?, ?, ?, ?, ?, ?)";
-
-        try {
-            conn = DatabaseHelper.getConnection();
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, hd.getMaHoaDon().trim());
-            pst.setString(2, hd.getMaNhanVien().trim());
-            pst.setString(3, hd.getMaKH() != null ? hd.getMaKH().trim() : null);
-            pst.setDate(4, new java.sql.Date(hd.getNgayBan().getTime()));
-            pst.setDouble(5, hd.getThanhTien());
-            pst.setString(6, hd.getTrangThai());
-
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            closeResources();
-        }
     }
 
     // Tìm kiếm hóa đơn
@@ -191,7 +167,7 @@ public class hoadonDAL {
     // Lấy chi tiết hóa đơn
     public List<ChiTietHoaDonDTO> layChiTietHoaDon(String maHoaDon) {
         List<ChiTietHoaDonDTO> danhSach = new ArrayList<>();
-        String sql = "SELECT * FROM CHITIETHOADON WHERE MAHD = ?";
+        String sql = "SELECT * FROM CHITIETHOADON WHERE TRIM(MAHD) = ?";
 
         try {
             conn = DatabaseHelper.getConnection();
@@ -276,27 +252,12 @@ public class hoadonDAL {
         return 0;
     }
 
-    public boolean capNhatTongTienHoaDon(String maHoaDon) {
-        String sql = "UPDATE HOADON hd SET THANHTIEN = " +
-                "(SELECT SUM(ct.SOLUONG * ct.GIA) FROM CHITIETHOADON ct WHERE ct.MAHD = hd.MAHD) " +
-                "WHERE hd.MAHD = ?";
-
-        try (Connection conn = DatabaseHelper.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, maHoaDon);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public HoaDonDTO layHoaDonTheoMa(String maHoaDon) {
-        String sql = "SELECT * FROM HOADON WHERE MAHD = ?";
+        String sql = "SELECT * FROM HOADON WHERE TRIM(MAHD) = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maHoaDon);
+            pst.setString(1, maHoaDon.trim());
             rs = pst.executeQuery();
 
             if (rs.next()) {
@@ -318,11 +279,11 @@ public class hoadonDAL {
     }
 
     public boolean xoaHoaDon(String maHoaDon) {
-        String sql = "DELETE FROM HOADON WHERE MAHD = ?";
+        String sql = "DELETE FROM HOADON WHERE TRIM(MAHD) = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maHoaDon);
+            pst.setString(1, maHoaDon.trim());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -333,11 +294,11 @@ public class hoadonDAL {
     }
 
     public boolean xoaTatCaChiTietHoaDon(String maHoaDon) {
-        String sql = "DELETE FROM CHITIETHOADON WHERE MAHD = ?";
+        String sql = "DELETE FROM CHITIETHOADON WHERE TRIM(MAHD) = ?";
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
-            pst.setString(1, maHoaDon);
+            pst.setString(1, maHoaDon.trim());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -347,47 +308,32 @@ public class hoadonDAL {
         }
     }
 
-    public String layTenSanPham(String maSanPham) {
-        String sql = "SELECT TENSP FROM SANPHAM WHERE MASP = ?";
-        try {
-            conn = DatabaseHelper.getConnection();
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, maSanPham);
-            rs = pst.executeQuery();
-
-            if (rs.next()) {
-                return rs.getString("TENSP");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            closeResources();
-        }
-        return "Không xác định";
-    }
-
     public Map<String, String> layDanhSachTenSanPham(List<String> danhSachMaSP) {
         Map<String, String> result = new HashMap<>();
         if (danhSachMaSP == null || danhSachMaSP.isEmpty()) {
             return result;
         }
 
-        // Tạo chuỗi tham số cho IN clause
-        String placeholders = String.join(",", Collections.nCopies(danhSachMaSP.size(), "?"));
-        String sql = "SELECT MASP, TENSP FROM SANPHAM WHERE MASP IN (" + placeholders + ")";
+        // Chuẩn hóa danh sách mã SP: trim() + uppercase
+        List<String> danhSachMaSPChuanHoa = danhSachMaSP.stream()
+                .map(maSP -> maSP.trim().toUpperCase())
+                .collect(Collectors.toList());
+
+        String placeholders = String.join(",", Collections.nCopies(danhSachMaSPChuanHoa.size(), "?"));
+        String sql = "SELECT MASP, TENSP FROM SANPHAM WHERE UPPER(TRIM(MASP)) IN (" + placeholders + ")";
 
         try {
             conn = DatabaseHelper.getConnection();
             pst = conn.prepareStatement(sql);
 
-            // Thiết lập các tham số
-            for (int i = 0; i < danhSachMaSP.size(); i++) {
-                pst.setString(i + 1, danhSachMaSP.get(i));
+            // Truyền tham số đã chuẩn hóa
+            for (int i = 0; i < danhSachMaSPChuanHoa.size(); i++) {
+                pst.setString(i + 1, danhSachMaSPChuanHoa.get(i));
             }
 
             rs = pst.executeQuery();
             while (rs.next()) {
-                result.put(rs.getString("MASP"), rs.getString("TENSP"));
+                result.put(rs.getString("MASP").trim(), rs.getString("TENSP"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -477,9 +423,6 @@ public class hoadonDAL {
             String sqlCT = "INSERT INTO CHITIETHOADON (MAHD, MASP, SOLUONG, GIA) VALUES (?, ?, ?, ?)";
             try (PreparedStatement pstCT = conn.prepareStatement(sqlCT)) {
                 for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
-                    if (!giamSoLuongSanPham(ct.getMaSanPham().trim(), ct.getSoLuong(), conn)) {
-                        throw new SQLException("Không thể cập nhật tồn kho cho " + ct.getMaSanPham());
-                    }
 
                     pstCT.setString(1, ct.getMaHoaDon().trim());
                     pstCT.setString(2, ct.getMaSanPham().trim());
@@ -515,100 +458,83 @@ public class hoadonDAL {
 
     public boolean capNhatHoaDonVoiChiTiet(HoaDonDTO hd, List<ChiTietHoaDonDTO> danhSachChiTiet) {
         Connection connection = null;
-        PreparedStatement pstHoaDon = null;
-        PreparedStatement pstDeleteChiTiet = null;
-        PreparedStatement pstInsertChiTiet = null;
-
         try {
             connection = DatabaseHelper.getConnection();
-            connection.setAutoCommit(false); // Start transaction
+            connection.setAutoCommit(false);
 
-            // 1. Update main bill information
-            String sqlHoaDon = "UPDATE HOADON SET MANV = ?, MAKH = ?, NgayBan = ?, ThanhTien = ? WHERE MAHD = ?";
-            pstHoaDon = connection.prepareStatement(sqlHoaDon);
-            pstHoaDon.setString(1, hd.getMaNhanVien());
-            pstHoaDon.setString(2, hd.getMaKH());
-            pstHoaDon.setDate(3, new java.sql.Date(hd.getNgayBan().getTime()));
-            pstHoaDon.setDouble(4, hd.getThanhTien());
-            pstHoaDon.setString(5, hd.getMaHoaDon());
-            int rowsUpdated = pstHoaDon.executeUpdate();
+            // CHUẨN HÓA TẤT CẢ MÃ (trim cả dữ liệu đầu vào và dữ liệu database)
+            String maHD = hd.getMaHoaDon().trim();
+            String maNV = hd.getMaNhanVien().trim();
+            String maKH = hd.getMaKH() != null ? hd.getMaKH().trim() : null;
 
-            if (rowsUpdated == 0) {
-                connection.rollback();
-                return false;
+            // Debug log
+            System.out.println("Attempting to update invoice: " + maHD);
+
+            // 1. Cập nhật hóa đơn - Sử dụng RTRIM để xử lý khoảng trắng trong database
+            String sqlHD = "UPDATE HOADON SET MANV = RTRIM(?), MAKH = RTRIM(?), NGAYBAN = ?, THANHTIEN = ? WHERE RTRIM(MAHD) = ?";
+            try (PreparedStatement pstHD = connection.prepareStatement(sqlHD)) {
+                pstHD.setString(1, maNV);
+                if (maKH != null && !maKH.isEmpty()) {
+                    pstHD.setString(2, maKH);
+                } else {
+                    pstHD.setNull(2, Types.VARCHAR);
+                }
+                pstHD.setDate(3, new java.sql.Date(hd.getNgayBan().getTime()));
+                pstHD.setDouble(4, hd.getThanhTien());
+                pstHD.setString(5, maHD);
+
+                int updatedRows = pstHD.executeUpdate();
+                if (updatedRows == 0) {
+                    throw new SQLException("Không tìm thấy hóa đơn với mã: " + maHD);
+                }
             }
 
-            // 2. Delete all existing details
-            String sqlDeleteChiTiet = "DELETE FROM CHITIETHOADON WHERE MAHD = ?";
-            pstDeleteChiTiet = connection.prepareStatement(sqlDeleteChiTiet);
-            pstDeleteChiTiet.setString(1, hd.getMaHoaDon());
-            pstDeleteChiTiet.executeUpdate();
-
-            // 3. Insert new details
-            String sqlInsertChiTiet = "INSERT INTO CHITIETHOADON (MAHD, MaSP, SoLuong, Gia) VALUES (?, ?, ?, ?)";
-            pstInsertChiTiet = connection.prepareStatement(sqlInsertChiTiet);
-
-            for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
-                pstInsertChiTiet.setString(1, ct.getMaHoaDon());
-                pstInsertChiTiet.setString(2, ct.getMaSanPham());
-                pstInsertChiTiet.setInt(3, ct.getSoLuong());
-                pstInsertChiTiet.setDouble(4, ct.getGia());
-                pstInsertChiTiet.addBatch();
+            // 2. Xóa chi tiết cũ - Sử dụng RTRIM
+            String sqlDelete = "DELETE FROM CHITIETHOADON WHERE RTRIM(MAHD) = ?";
+            try (PreparedStatement pstDel = connection.prepareStatement(sqlDelete)) {
+                pstDel.setString(1, maHD);
+                pstDel.executeUpdate();
             }
 
-            pstInsertChiTiet.executeBatch();
+            // 3. Thêm chi tiết mới
+            String sqlInsert = "INSERT INTO CHITIETHOADON (MAHD, MASP, SOLUONG, GIA) VALUES (RTRIM(?), RTRIM(?), ?, ?)";
+            try (PreparedStatement pstIns = connection.prepareStatement(sqlInsert)) {
+                for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
+                    pstIns.setString(1, maHD);
+                    pstIns.setString(2, ct.getMaSanPham().trim());
+                    pstIns.setInt(3, ct.getSoLuong());
+                    pstIns.setDouble(4, ct.getGia());
+                    pstIns.addBatch();
+                }
+                pstIns.executeBatch();
+            }
 
-            connection.commit(); // Commit transaction
+            connection.commit();
             return true;
-
         } catch (SQLException e) {
             try {
-                if (connection != null) {
-                    connection.rollback(); // Rollback if error occurs
-                }
+                if (connection != null) connection.rollback();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
+
+            // Hiển thị thông báo lỗi chi tiết hơn
+            String errorMsg = "Lỗi SQL: " + e.getMessage() + "\n";
+            errorMsg += "Mã lỗi: " + e.getErrorCode() + "\n";
+            errorMsg += "Trạng thái SQL: " + e.getSQLState();
+
+            JOptionPane.showMessageDialog(null, errorMsg, "Lỗi Database Chi Tiết", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             return false;
         } finally {
-            // Close all resources
             try {
-                if (pstInsertChiTiet != null) pstInsertChiTiet.close();
-                if (pstDeleteChiTiet != null) pstDeleteChiTiet.close();
-                if (pstHoaDon != null) pstHoaDon.close();
                 if (connection != null) {
-                    connection.setAutoCommit(true); // Reset auto-commit
+                    connection.setAutoCommit(true);
                     connection.close();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    // Thêm vào hoadonDAL.java
-    private boolean giamSoLuongSanPham(String maSP, int soLuong, Connection conn) throws SQLException {
-        String checkSql = "SELECT SOLUONG FROM SANPHAM WHERE TRIM(MASP) = ? FOR UPDATE";
-        try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-            checkStmt.setString(1, maSP.trim());
-            ResultSet rs = checkStmt.executeQuery();
-
-            if (!rs.next()) {
-                throw new SQLException("Sản phẩm " + maSP + " không tồn tại");
-            }
-
-            int soLuongTon = rs.getInt("SOLUONG");
-            if (soLuongTon < soLuong) {
-                throw new SQLException("Không đủ tồn kho cho " + maSP);
-            }
-        }
-
-        String updateSql = "UPDATE SANPHAM SET SOLUONG = SOLUONG - ? WHERE TRIM(MASP) = ?";
-        try (PreparedStatement pst = conn.prepareStatement(updateSql)) {
-            pst.setInt(1, soLuong);
-            pst.setString(2, maSP.trim());
-            return pst.executeUpdate() > 0;
         }
     }
 
@@ -618,23 +544,10 @@ public class hoadonDAL {
             conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Lấy danh sách chi tiết
-            List<ChiTietHoaDonDTO> chiTiet = layChiTietHoaDon(maHoaDon);
-
-            // 2. Phục hồi số lượng tồn kho
-            for (ChiTietHoaDonDTO ct : chiTiet) {
-                String sql = "UPDATE SANPHAM SET SOLUONG = SOLUONG + ? WHERE MASP = ?";
-                try (PreparedStatement pst = conn.prepareStatement(sql)) {
-                    pst.setInt(1, ct.getSoLuong());
-                    pst.setString(2, ct.getMaSanPham());
-                    pst.executeUpdate();
-                }
-            }
-
             // 3. Cập nhật trạng thái hóa đơn
-            String sqlUpdate = "UPDATE HOADON SET TRANGTHAI = 'DA_HUY' WHERE MAHD = ?";
+            String sqlUpdate = "UPDATE HOADON SET TRANGTHAI = 'DA_HUY' WHERE TRIM(MAHD) = ?";
             try (PreparedStatement pst = conn.prepareStatement(sqlUpdate)) {
-                pst.setString(1, maHoaDon);
+                pst.setString(1, maHoaDon.trim());
                 pst.executeUpdate();
             }
 

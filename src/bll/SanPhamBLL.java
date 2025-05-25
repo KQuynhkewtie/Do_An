@@ -11,17 +11,18 @@ public class SanPhamBLL {
         spDAL = new SanPhamDAL();
     }
 
-    // Lấy danh sách tất cả sản phẩm
     public List<SanPhamDTO> getAllSanPham() {
         return spDAL.getAllSanPham();
     }
 
-    // Cập nhật thông tin sản phẩm
+    public boolean insertSanPham(SanPhamDTO sp) {
+        return spDAL.insertSanPham(sp);
+    }
+
     public boolean updateSanPham(SanPhamDTO sp) {
         return spDAL.updateSanPham(sp);
     }
 
-    // Tìm kiếm sản phẩm theo từ khóa
     public List<SanPhamDTO> getSanPham(String keyword) {
         return spDAL.getSanPham(keyword);
     }
@@ -30,4 +31,15 @@ public class SanPhamBLL {
         return spDAL.getSanPhamById(maSP);
     }
 
+    public boolean deleteSanPhamById(String maSP) {
+        return spDAL.deleteSanPhamById(maSP);
+    }
+
+    public String getLSPByMa(String maLSP) {
+        return spDAL.getLSPByMa(maLSP);
+    }
+
+    public String getHSXByMa(String maHSX) {
+        return spDAL.getHSXByMa(maHSX);
+    }
 }

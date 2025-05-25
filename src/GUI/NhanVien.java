@@ -16,38 +16,39 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 public class NhanVien extends BaseFrame {
-	private NhanVienBLL bllnv = new NhanVienBLL();
+    private NhanVienBLL bllnv = new NhanVienBLL();
     private DefaultTableModel model;
     private JTable table;
     private JTextField searchnvField;
-
+    private Map<String, String> viTriMap;
     public NhanVien() {
-    	super("Nhân viên");
-    	initialize();
-    	} 
+        super("Nhân viên");
+        initialize();
+    }
     @Override
-	protected void initUniqueComponents() {
-		 for (JButton btn : menuButtons) {
-	            if (btn.getText().equals("Nhân viên")) {
-	                btn.setBackground(Color.decode("#EF5D7A")); 
-	                btn.setFont(new Font("Arial", Font.BOLD, 14)); 
-	            }
-	        }
-	        
-	        // Các nút khác vẫn giữ màu mặc định
-	        for (JButton btn : menuButtons) {
-	            if (!btn.getText().equals("Nhân viên")) {
-	                btn.setBackground(Color.decode("#641A1F")); // Màu mặc định cho các nút khác
-	                btn.setFont(new Font("Arial", Font.BOLD, 12));
-	            }
-	        }
-           
-            JLabel lblNhanVien = new JLabel("Nhân viên", SwingConstants.LEFT);
-            lblNhanVien.setFont(new Font("Arial", Font.BOLD, 20));
-            lblNhanVien.setBounds(270, 60, 200, 30);
-            add(lblNhanVien);
+    protected void initUniqueComponents() {
+        for (JButton btn : menuButtons) {
+            if (btn.getText().equals("Nhân viên")) {
+                btn.setBackground(Color.decode("#EF5D7A"));
+                btn.setFont(new Font("Arial", Font.BOLD, 14));
+            }
+        }
+
+
+        for (JButton btn : menuButtons) {
+            if (!btn.getText().equals("Nhân viên")) {
+                btn.setBackground(Color.decode("#641A1F"));
+                btn.setFont(new Font("Arial", Font.BOLD, 12));
+            }
+        }
+
+        JLabel lblNhanVien = new JLabel("Nhân viên", SwingConstants.LEFT);
+        lblNhanVien.setFont(new Font("Arial", Font.BOLD, 20));
+        lblNhanVien.setBounds(270, 60, 200, 30);
+        add(lblNhanVien);
 
 
         searchnvField = new JTextField("Tìm kiếm nhân viên");
@@ -58,17 +59,17 @@ public class NhanVien extends BaseFrame {
             @Override
             public void focusGained(FocusEvent e) {
                 if (searchnvField.getText().equals("Tìm kiếm nhân viên")) {
-                	searchnvField.setText("");
-                	searchnvField.setForeground(Color.BLACK);
+                    searchnvField.setText("");
+                    searchnvField.setForeground(Color.BLACK);
                 }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 if (searchnvField.getText().trim().isEmpty()) {
-                	searchnvField.setText("Tìm kiếm nhân viên");
-                	searchnvField.setForeground(Color.GRAY);
-                	 loadNhanVien();
+                    searchnvField.setText("Tìm kiếm nhân viên");
+                    searchnvField.setForeground(Color.GRAY);
+                    loadNhanVien();
                 }
             }
         });
@@ -77,9 +78,9 @@ public class NhanVien extends BaseFrame {
             public void keyReleased(KeyEvent e) {
                 String keyword = searchnvField.getText().trim();
                 if (keyword.isEmpty()) {
-               	 loadNhanVien(); // Tự động hiển thị lại danh sách sản phẩm khi ô tìm kiếm trống
+                    loadNhanVien();
                 } else {
-                    searchNhanVien(); // Tiến hành tìm kiếm nếu có từ khóa
+                    searchNhanVien();
                 }
             }
         });
@@ -89,23 +90,26 @@ public class NhanVien extends BaseFrame {
         btnThemNV.setForeground(Color.WHITE);
         add(btnThemNV);
 
-        // Bảng khách hàng
+
         String[] columnNames = { "Mã", "Họ tên","CCCD", "SĐT", "Vị trí công việc","Mã số thuế"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
+        table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 150, 800, 400);
+        scrollPane.setBounds(270, 150, 800, 500);
         add(scrollPane);
 
-
+        addExceltButton(table);
 
         loadNhanVien();
-        //chuyển sang giao diện thêm nhân viên
         btnThemNV.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose(); // Đóng cửa sổ hiện tại
-                new Themnv(); 
+                dispose();
+                new Themnv();
             }
         });
         table.addMouseListener(new MouseAdapter() {
@@ -115,12 +119,13 @@ public class NhanVien extends BaseFrame {
                     int row = table.getSelectedRow();
                     if (row >= 0) {
                         String manv = table.getValueAt(row, 0).toString();
-                        NhanVienDTO nv = bllnv.getNhanVienTheoMa(manv);
+                        NhanVienDTO nv = bllnv.getNhanVienByID(manv);
                         if (nv != null) {
+                            dispose();
                             TTCTnv ctnv = new TTCTnv();
-                            ctnv.setThongTin(nv.getMaNhanVien(), nv.getHoTen(), nv.getCccd(), nv.getSdt(), nv.getViTriCongViec(), nv.getMaSoThue());
+                            ctnv.setThongTin(nv.getMaNhanVien(), nv.getHoTen(), nv.getCccd(), nv.getSdt(), nv.getViTriCongViec(), nv.getMaSoThue(), nv.getTrangThai());
                         } else {
-                            JOptionPane.showMessageDialog(null, "Không tìm thấy sản phẩm!");
+                            JOptionPane.showMessageDialog(null, "Không tìm thấy nhân viên!");
                         }
                     }
                 }
@@ -128,21 +133,21 @@ public class NhanVien extends BaseFrame {
         });
 
         setVisible(true);
-
-        //addExceltButton();
+    }
+    private void loadViTriMap() {
+        viTriMap = bllnv.getAllViTriMap();
     }
     private void loadNhanVien() {
-        model.setRowCount(0); // Xóa tất cả các dòng trong bảng
-        List<NhanVienDTO> list = bllnv.getDanhSachNhanVien();
-        
+        if (viTriMap == null) loadViTriMap();
+        model.setRowCount(0);
+        List<NhanVienDTO> list = bllnv.getAllNhanVien();
         for (NhanVienDTO nv : list) {
-            
-            model.addRow(new Object[]{nv.getMaNhanVien(), nv.getHoTen(),  nv.getCccd(), nv.getSdt(), nv.getViTriCongViec(), nv.getMaSoThue()});
+            String tenViTri = viTriMap.getOrDefault(nv.getViTriCongViec(), "Chưa xác định");
+            model.addRow(new Object[]{nv.getMaNhanVien(), nv.getHoTen(), nv.getCccd(), nv.getSdt(), tenViTri, nv.getMaSoThue(), nv.getTrangThai()});
         }
     }
-
     private void searchNhanVien() {
-    	String keyword = searchnvField.getText().trim();// Lấy từ khóa tìm kiếm từ ô nhập liệu
+        String keyword = searchnvField.getText().trim();
         if (keyword.equals("Tìm") || keyword.isEmpty()) {
             loadNhanVien();
             return;
@@ -150,16 +155,13 @@ public class NhanVien extends BaseFrame {
 
         model.setRowCount(0);
         List<NhanVienDTO> list = bllnv.getNhanVien(keyword);
-        
+
         for (NhanVienDTO nv : list) {
-            model.addRow(new Object[]{nv.getMaNhanVien(), nv.getHoTen(),  nv.getCccd(), nv.getSdt(), nv.getViTriCongViec(), nv.getMaSoThue()});
+            String tenViTri = nv.getTenVaiTro();
+            model.addRow(new Object[]{nv.getMaNhanVien(), nv.getHoTen(),  nv.getCccd(), nv.getSdt(), tenViTri, nv.getMaSoThue(), nv.getTrangThai()});
         }
     }
-//
-//    @Override
-//    protected void addExceltButton() {
-//        super.addExceltButton();
-//    }
+
 
     public static void main(String[] args) {
         new NhanVien();

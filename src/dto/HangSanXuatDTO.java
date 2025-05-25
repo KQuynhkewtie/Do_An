@@ -7,17 +7,18 @@ public class HangSanXuatDTO {
     private String maSoThue;
     private String diaChi;
     private String sdt;
+    private int trangThai;
 
     public HangSanXuatDTO() {}
-    
-    public HangSanXuatDTO(String maHSX, String tenHSX, String maSoThue, String diaChi, String sdt) {
+
+    public HangSanXuatDTO(String maHSX, String tenHSX, String maSoThue, String diaChi, String sdt, int trangThai) {
         this.maHSX = maHSX;
         this.tenHSX = tenHSX;
         this.maSoThue = maSoThue;
         this.diaChi = diaChi;
         this.sdt = sdt;
+        this.trangThai = trangThai;
     }
-
     public String getMaHSX() {
         return maHSX;
     }
@@ -56,5 +57,12 @@ public class HangSanXuatDTO {
 
     public void setSdt(String sdt) {
         this.sdt = sdt;
+    }
+    public int getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(int trangThai) {
+        this.trangThai = trangThai;
     }
 }

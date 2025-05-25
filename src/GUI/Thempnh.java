@@ -5,7 +5,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -146,8 +145,10 @@ public class Thempnh extends BaseFrame {
         };
 
         table = new JTable(tableModel);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Set up date picker for HSD column
         table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JTextField()) {
@@ -196,16 +197,16 @@ public class Thempnh extends BaseFrame {
         }
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(270, 310, 500, 300); //Chat chỉnh chỗ này từ 500 --> 800
+        scrollPane.setBounds(270, 310, 800, 200);
         add(scrollPane);
 
         // Nút thêm/xóa dòng
-        JButton btnThemDong = createActionButton("Thêm dòng", 800, 320, 100, 30);
+        JButton btnThemDong = createActionButton("Thêm dòng", 800, 520, 100, 30);
         btnThemDong.setBackground(Color.decode("#F5A623"));
         btnThemDong.addActionListener(e -> hienThiDanhSachSanPham());
         add(btnThemDong);
 
-        JButton btnXoaDong = createActionButton("Xóa dòng", 800, 360, 100, 30);
+        JButton btnXoaDong = createActionButton("Xóa dòng", 800, 560, 100, 30);
         btnXoaDong.setBackground(Color.decode("#D0021B"));
         btnXoaDong.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -307,6 +308,7 @@ public class Thempnh extends BaseFrame {
         // Panel tìm kiếm
         JPanel searchPanel = new JPanel(new BorderLayout());
         JTextField txtSearch = new JTextField("Tìm kiếm sản phẩm");
+        txtSearch.setPreferredSize(new Dimension(0, 30));
         txtSearch.setForeground(Color.GRAY);
         searchPanel.add(txtSearch, BorderLayout.CENTER);
         dialog.add(searchPanel, BorderLayout.NORTH);
@@ -315,6 +317,7 @@ public class Thempnh extends BaseFrame {
         String[] columnNames = {"Mã SP", "Tên SP", "Mã Loại SP", "Mã Hãng sản xuất"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
         JTable table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 25));
         table.setRowHeight(25);
         JScrollPane scrollPane = new JScrollPane(table);
         dialog.add(scrollPane, BorderLayout.CENTER);
@@ -433,6 +436,8 @@ public class Thempnh extends BaseFrame {
         }
 
         JTable table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 25));
+        table.setRowHeight(25);
         JScrollPane scrollPane = new JScrollPane(table);
         dialog.add(scrollPane);
 
@@ -453,7 +458,7 @@ public class Thempnh extends BaseFrame {
         dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(this);
 
-        List<NhaCungUngDTO> ncuList = ncuDAL.layDSNCU();
+        List<NhaCungUngDTO> ncuList = ncuDAL.getAllNCU();
         String[] columnNames = {"Mã NCU", "Tên NCU"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
@@ -462,6 +467,8 @@ public class Thempnh extends BaseFrame {
         }
 
         JTable table = new JTable(model);
+        table.getTableHeader().setPreferredSize(new Dimension(0, 25));
+        table.setRowHeight(25);
         JScrollPane scrollPane = new JScrollPane(table);
         dialog.add(scrollPane);
 

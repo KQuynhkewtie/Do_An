@@ -10,6 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.toedter.calendar.JDateChooser;
 import bll.HoaDonBLL;
 import dto.HoaDonDTO;
@@ -163,8 +166,10 @@ public class CapnhatttHD extends BaseFrame {
             }
         };
         table = new JTable(tableModel);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.getTableHeader().setPreferredSize(new Dimension(0, 35));
         table.setRowHeight(30);
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Thiết lập renderer cho các cột
         table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
@@ -528,12 +533,15 @@ public class CapnhatttHD extends BaseFrame {
             dateChooserNgay.setDate(hd.getNgayBan());
 
             List<ChiTietHoaDonDTO> danhSachChiTiet = hdBLL.layChiTietHoaDon(maHD);
-            tableModel.setRowCount(0);
-            for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
-                // Lấy thông tin tên sản phẩm từ CSDL
-                SanPhamDTO sp = spDAL.getSanPhamById(ct.getMaSanPham());
-                String tenSP = sp != null ? sp.getTenSP() : "Không xác định";
 
+            List<String> danhSachMaSP = danhSachChiTiet.stream()
+                    .map(ChiTietHoaDonDTO::getMaSanPham)
+                    .collect(Collectors.toList());
+
+            Map<String, String> tenSanPhamMap = hdBLL.layDanhSachTenSanPham(danhSachMaSP);
+
+            for (ChiTietHoaDonDTO ct : danhSachChiTiet) {
+                String tenSP = tenSanPhamMap.getOrDefault(ct.getMaSanPham(), "Không xác định");
                 tableModel.addRow(new Object[]{
                         ct.getMaSanPham(),
                         tenSP,

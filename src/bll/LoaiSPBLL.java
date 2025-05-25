@@ -8,8 +8,8 @@ public class LoaiSPBLL {
 	private loaispdal lspDal = new loaispdal();
 
     // Lấy danh sách loại sản phẩm
-    public ArrayList<LoaiSPDTO> layDSLSP() {
-        return lspDal.layDSLSP();
+    public ArrayList<LoaiSPDTO> getAllLSP() {
+        return lspDal.getAllLSP();
     }
 
     // Lấy loại sản phẩm theo mã
