@@ -197,10 +197,10 @@ public abstract class BaseFrame extends JFrame {
         JButton btnExportPDF = new JButton(resizedIconPDF);
         btnExportPDF.setBounds(970, 50, 40, 40);
 
-        btnExportPDF.setBackground(null); // Không có nền
-        btnExportPDF.setBorderPainted(false); // Không có viền
-        btnExportPDF.setFocusPainted(false); // Không có viền khi focus
-        btnExportPDF.setContentAreaFilled(false); // Không tô nền khi hover
+        btnExportPDF.setBackground(null);
+        btnExportPDF.setBorderPainted(false); 
+        btnExportPDF.setFocusPainted(false);
+        btnExportPDF.setContentAreaFilled(false); 
 
         // Đảm bảo button có thể nhấn
         btnExportPDF.setOpaque(true);
@@ -268,7 +268,7 @@ public abstract class BaseFrame extends JFrame {
         // Thiết lập icon nếu có đường dẫn
         if (iconPath != null && !iconPath.isEmpty()) {
             ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconPath));
-            Image image = icon.getImage().getScaledInstance(22, 26, Image.SCALE_SMOOTH); // Kích thước icon 20x20
+            Image image = icon.getImage().getScaledInstance(22, 26, Image.SCALE_SMOOTH); 
             btn.setIcon(new ImageIcon(image));
             btn.setHorizontalAlignment(SwingConstants.LEFT); // Căn trái cả icon và text
             btn.setIconTextGap(15); // Khoảng cách giữa icon và text
